@@ -76,6 +76,11 @@ public class AnnotationProcessorHelper {
         return isAssignable(type, TypeConstants.FQDN_PARCELABLE);
     }
 
+    public TypeMirror ofType(String targetFqdn) {
+        TypeElement element = env.getElementUtils().getTypeElement(targetFqdn);
+        return element == null ? null : element.asType();
+    }
+
     /**
      * 判断{@code type}是否可赋值到{@code targetFqdn}类型
      *
@@ -85,9 +90,7 @@ public class AnnotationProcessorHelper {
      */
     private boolean isAssignable(TypeMirror type, String targetFqdn) {
         Types types = env.getTypeUtils();
-        Elements elements = env.getElementUtils();
-        return types.isAssignable(type, elements.getTypeElement(targetFqdn) == null ?
-                null : elements.getTypeElement(targetFqdn).asType());
+        return types.isAssignable(type, ofType(targetFqdn));
     }
 
 
@@ -100,9 +103,7 @@ public class AnnotationProcessorHelper {
      */
     private boolean isSameType(TypeMirror type, String targetFqdn) {
         Types types = env.getTypeUtils();
-        Elements elements = env.getElementUtils();
-        return types.isSameType(type, elements.getTypeElement(targetFqdn) == null ?
-                null : elements.getTypeElement(targetFqdn).asType());
+        return types.isSameType(type, ofType(targetFqdn));
     }
 
     public void i(String tag, String message) {

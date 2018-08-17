@@ -1,5 +1,7 @@
 package com.tutuur.navigator;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.squareup.javapoet.ClassName;
@@ -8,6 +10,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.tutuur.util.AnnotationProcessorHelper;
+import com.tutuur.util.TypeConstants;
 
 import java.util.List;
 
@@ -57,7 +60,12 @@ class BundleBuilderGenerator {
         for (VariableElement member : members) {
             brewAttribute(builder, clazzType, member);
         }
-        brewBuild(builder);
+        brewBuildMethod(builder);
+        brewNewIntentMethod(builder);
+        brewStartActivityMethod(builder);
+        brewStartActivityMethod(builder, TypeConstants.FQDN_ACTIVITY);
+        brewStartActivityMethod(builder, TypeConstants.FQDN_FRAGMENT);
+        brewStartActivityMethod(builder, TypeConstants.FQDN_SUPPORT_FRAGMENT);
         return builder.build();
     }
 
@@ -65,12 +73,6 @@ class BundleBuilderGenerator {
         final String name = member.getSimpleName().toString();
         final TypeName type = TypeName.get(member.asType());
         builder.addField(type, name, Modifier.PRIVATE);
-        // add get method.
-        builder.addMethod(MethodSpec.methodBuilder(name)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(type)
-                .addStatement(String.format("return this.%s", name))
-                .build());
         // add set method.
         builder.addMethod(MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC)
@@ -81,9 +83,9 @@ class BundleBuilderGenerator {
                 .build());
     }
 
-    private void brewBuild(TypeSpec.Builder builder) {
+    private void brewBuildMethod(TypeSpec.Builder builder) {
         final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("build")
-                .addModifiers(Modifier.PUBLIC)
+                .addModifiers(Modifier.PRIVATE)
                 .returns(ClassName.get(Bundle.class))
                 .addStatement("$T var0 = new $T()", Bundle.class, Bundle.class);
         for (VariableElement member : members) {
@@ -111,6 +113,40 @@ class BundleBuilderGenerator {
             }
         }
         methodBuilder.addStatement("return var0");
+        builder.addMethod(methodBuilder.build());
+    }
+
+    private void brewNewIntentMethod(TypeSpec.Builder builder) {
+        final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("newIntent")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(ClassName.get(Intent.class))
+                .addParameter(ClassName.get(Context.class), "context")
+                .addStatement("$T intent = new $T(context, $T.class)", Intent.class, Intent.class, ClassName.get(clazz))
+                .addStatement("intent.putExtras(build())")
+                .addStatement("return intent");
+        builder.addMethod(methodBuilder.build());
+    }
+
+    private void brewStartActivityMethod(TypeSpec.Builder builder) {
+        final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startActivity")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.VOID)
+                .addParameter(ClassName.get(Context.class), "context")
+                .addStatement("context.startActivity(newIntent(context))");
+        builder.addMethod(methodBuilder.build());
+    }
+
+    private void brewStartActivityMethod(TypeSpec.Builder builder, String clazz) {
+        final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startActivity")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.VOID)
+                .addParameter(TypeName.get(helper.ofType(clazz)), "context")
+                .addParameter(TypeName.INT, "requestCode");
+        if (TypeConstants.FQDN_ACTIVITY.equals(clazz)) {
+            methodBuilder.addStatement("context.startActivityForResult(newIntent(context), requestCode)");
+        } else {
+            methodBuilder.addStatement("context.startActivityForResult(newIntent(context.getContext()), requestCode)");
+        }
         builder.addMethod(methodBuilder.build());
     }
 }

@@ -1,6 +1,6 @@
 package com.tutuur.util;
 
-interface TypeConstants {
+public interface TypeConstants {
 
     String FQDN_STRING = "java.lang.String";
 
