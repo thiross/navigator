@@ -6,27 +6,21 @@ import android.support.v7.app.AppCompatActivity;
 import com.tutuur.navigator.BundleExtra;
 import com.tutuur.navigator.Navigation;
 
-@Navigation(
-        schemes = {
-                "scheme://main/:id",
-                "https://www.tutuur.com/main/:id"
-        }
-)
-public class MainActivity extends AppCompatActivity {
+@Navigation
+public class SecondActivity extends AppCompatActivity {
 
     @BundleExtra
-    String id;
+    String username;
 
-    /*
-    static class Inner {
-        @BundleExtra
-        String id;
-    }
-    */
+    @BundleExtra
+    String email;
+
+    @BundleExtra
+    long timestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_second);
     }
 }

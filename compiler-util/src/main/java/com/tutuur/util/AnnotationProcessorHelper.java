@@ -5,26 +5,26 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 
 /**
- * Java类型判断工具类
+ * {@code AnnotationProcessor}帮助类
  *
  * @author yujie
  */
-public class TypeAnatomy {
+public class AnnotationProcessorHelper {
 
-    private final Elements elements;
-
-    private final Types types;
+    private static final String MESSAGE_FORMAT = "[%s] %s";
+    
+    private final ProcessingEnvironment env;
 
     /**
      * 从ProcessingEnvironment获取相关参数，构造实例
      *
      * @param env AnnotationProcessor对应的环境
      */
-    public TypeAnatomy(ProcessingEnvironment env) {
-        elements = env.getElementUtils();
-        types = env.getTypeUtils();
+    public AnnotationProcessorHelper(ProcessingEnvironment env) {
+        this.env = env;
     }
 
     /**
@@ -56,6 +56,8 @@ public class TypeAnatomy {
      * @return 返回{@code true}如果可以赋值
      */
     private boolean isAssignable(TypeMirror type, String targetFqdn) {
+        Types types = env.getTypeUtils();
+        Elements elements = env.getElementUtils();
         return types.isAssignable(type, elements.getTypeElement(targetFqdn) == null ?
                 null : elements.getTypeElement(targetFqdn).asType());
     }
@@ -69,7 +71,19 @@ public class TypeAnatomy {
      * @return 返回{@code true}如果完全匹配
      */
     private boolean isSameType(TypeMirror type, String targetFqdn) {
+        Types types = env.getTypeUtils();
+        Elements elements = env.getElementUtils();
         return types.isSameType(type, elements.getTypeElement(targetFqdn) == null ?
                 null : elements.getTypeElement(targetFqdn).asType());
+    }
+
+    public void i(String tag, String message) {
+        env.getMessager()
+                .printMessage(Diagnostic.Kind.NOTE, String.format(MESSAGE_FORMAT, tag, message));
+    }
+
+    public void e(String tag, String message) {
+        env.getMessager()
+                .printMessage(Diagnostic.Kind.ERROR, String.format(MESSAGE_FORMAT, tag, message));
     }
 }

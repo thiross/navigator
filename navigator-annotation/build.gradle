@@ -2,9 +2,6 @@ apply plugin: 'java-library'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    compileOnly 'com.google.android:android:4.1.1.4'
-    compileOnly 'com.squareup:javapoet:1.11.1'
 }
 
 sourceCompatibility = "1.7"
