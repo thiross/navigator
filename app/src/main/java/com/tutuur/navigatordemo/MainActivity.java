@@ -2,7 +2,6 @@ package com.tutuur.navigatordemo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-
 import android.view.View;
 import com.tutuur.navigator.BundleExtra;
 import com.tutuur.navigator.Navigation;
@@ -18,7 +17,7 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
 
     @BundleExtra
-    boolean available;
+    boolean available = true;
 
     @BundleExtra
     byte b;
@@ -39,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     double ratio;
 
     @BundleExtra
-    String id;
+    String id = "ABC";
 
     /*
     static class Inner {
@@ -55,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateTo(View view) {
-        new SecondActivityBundleBuilder()
+        Navigator.gotoSecondActivity()
                 .email("fake@fake.fake")
                 .username("zale")
                 .timestamp(new Date().getTime())
