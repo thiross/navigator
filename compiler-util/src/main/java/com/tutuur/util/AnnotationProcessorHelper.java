@@ -15,37 +15,65 @@ import javax.tools.Diagnostic;
 public class AnnotationProcessorHelper {
 
     private static final String MESSAGE_FORMAT = "[%s] %s";
-    
+
     private final ProcessingEnvironment env;
+
+    private final boolean debug;
 
     /**
      * 从ProcessingEnvironment获取相关参数，构造实例
      *
-     * @param env AnnotationProcessor对应的环境
+     * @param env   AnnotationProcessor对应的环境
+     * @param debug 是否开启Debug模式.
      */
-    public AnnotationProcessorHelper(ProcessingEnvironment env) {
+    public AnnotationProcessorHelper(ProcessingEnvironment env, boolean debug) {
         this.env = env;
+        this.debug = debug;
+    }
+
+    public ProcessingEnvironment getEnv() {
+        return env;
+    }
+
+    public String getPackageName(TypeElement element) {
+        return env.getElementUtils()
+                .getPackageOf(element)
+                .getQualifiedName()
+                .toString();
+    }
+
+    public boolean isString(TypeMirror type) {
+        return isSameType(type, TypeConstants.FQDN_STRING);
     }
 
     /**
      * 判断是否是Activity
      *
-     * @param element 待判断的类型
-     * @return 返回{@code} 如果{@code element}继承自{@code Activity}
+     * @param type 待判断的类型
+     * @return 返回{@code} 如果{@code type}继承自{@code Activity}
      */
-    public boolean isActivity(TypeElement element) {
-        return isAssignable(element.asType(), TypeConstants.FQDN_ACTIVITY);
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean isActivity(TypeMirror type) {
+        return isAssignable(type, TypeConstants.FQDN_ACTIVITY);
     }
 
     /**
      * 判断是否是Fragment
      *
-     * @param element 待判断的类型
-     * @return 返回{@code} 如果{@code element}继承自{@code Fragment}
+     * @param type 待判断的类型
+     * @return 返回{@code} 如果{@code type}继承自{@code Fragment}
      */
-    public boolean isFragment(TypeElement element) {
-        return isAssignable(element.asType(), TypeConstants.FQDN_FRAGMENT)
-                || isAssignable(element.asType(), TypeConstants.FQDN_SUPPORT_FRAGMENT);
+    public boolean isFragment(TypeMirror type) {
+        return isAssignable(type, TypeConstants.FQDN_FRAGMENT)
+                || isAssignable(type, TypeConstants.FQDN_SUPPORT_FRAGMENT);
+    }
+
+    public boolean isSerializable(TypeMirror type) {
+        return isAssignable(type, TypeConstants.FQDN_SERIALIZABLE);
+    }
+
+    public boolean isParcelable(TypeMirror type) {
+        return isAssignable(type, TypeConstants.FQDN_PARCELABLE);
     }
 
     /**
@@ -78,8 +106,10 @@ public class AnnotationProcessorHelper {
     }
 
     public void i(String tag, String message) {
-        env.getMessager()
-                .printMessage(Diagnostic.Kind.NOTE, String.format(MESSAGE_FORMAT, tag, message));
+        if (debug) {
+            env.getMessager()
+                    .printMessage(Diagnostic.Kind.NOTE, String.format(MESSAGE_FORMAT, tag, message));
+        }
     }
 
     public void e(String tag, String message) {

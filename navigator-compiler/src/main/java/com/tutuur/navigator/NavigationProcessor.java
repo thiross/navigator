@@ -1,8 +1,10 @@
 package com.tutuur.navigator;
 
 import com.google.auto.service.AutoService;
+import com.squareup.javapoet.JavaFile;
 import com.tutuur.util.AnnotationProcessorHelper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,8 +27,6 @@ public class NavigationProcessor extends AbstractProcessor {
 
     private static final String TAG = NavigationProcessor.class.getSimpleName();
 
-    private static final boolean DEBUG = true;
-
     private AnnotationProcessorHelper helper;
 
     @Override
@@ -45,7 +45,7 @@ public class NavigationProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment env) {
         super.init(env);
-        helper = new AnnotationProcessorHelper(env);
+        helper = new AnnotationProcessorHelper(env, true);
     }
 
     @Override
@@ -55,14 +55,15 @@ public class NavigationProcessor extends AbstractProcessor {
             helper.i(TAG, "No navigation class found.");
             return false;
         }
-        Set<TypeElement> clazzSet = navigation.keySet();
-        String packageName = findPackageName(clazzSet);
-        if (DEBUG) {
-            helper.i(TAG, String.format("Find common package name: %s", packageName));
-        }
-        for (TypeElement clazz : clazzSet) {
-            if (DEBUG) {
-                helper.i(TAG, String.format("Generating navigation for %s", clazz.getQualifiedName()));
+        final Set<TypeElement> clazzSet = navigation.keySet();
+        final String packageName = findPackageName(clazzSet);
+        helper.i(TAG, String.format("Find common package name: %s", packageName));
+        for (final TypeElement clazz : clazzSet) {
+            final List<VariableElement> members = navigation.get(clazz);
+            if (members.size() > 0) {
+                final JavaFile file = new BundleBuilderGenerator(helper, clazz, members)
+                        .brewJava();
+                createFile(file);
             }
         }
         return false;
@@ -72,7 +73,7 @@ public class NavigationProcessor extends AbstractProcessor {
         Map<TypeElement, List<VariableElement>> navigation = new HashMap<>();
         for (Element element : env.getElementsAnnotatedWith(BundleExtra.class)) {
             final TypeElement clazz = (TypeElement) element.getEnclosingElement();
-            if (!helper.isActivity(clazz)) {
+            if (!helper.isActivity(clazz.asType())) {
                 helper.e(TAG, String.format("%s is annotated with @BundleExtra but %s is not a Activity", element.getSimpleName(), clazz.getQualifiedName()));
             }
             if (!navigation.containsKey(clazz)) {
@@ -83,7 +84,7 @@ public class NavigationProcessor extends AbstractProcessor {
         }
         for (Element element : env.getElementsAnnotatedWith(Navigation.class)) {
             final TypeElement clazz = (TypeElement) element;
-            if (!helper.isActivity(clazz)) {
+            if (!helper.isActivity(clazz.asType())) {
                 helper.e(TAG, String.format("@Navigation annotated %s is not a Activity", (clazz).getQualifiedName()));
             }
             if (!navigation.containsKey(clazz)) {
@@ -96,18 +97,12 @@ public class NavigationProcessor extends AbstractProcessor {
     private String findPackageName(Set<TypeElement> clazzSet) {
         String name = null;
         for (TypeElement clazz : clazzSet) {
-            String clazzName = clazz.getQualifiedName().toString();
-            int index = clazzName.lastIndexOf('.');
-            if (index >= 0) {
-                clazzName = clazzName.substring(0, index);
-            } else {
-                helper.e(TAG, "No common package name found for all annotated classes.");
-            }
+            String packageName = helper.getPackageName(clazz);
             if (name == null) {
-                name = clazzName;
-             } else {
-                while (!clazzName.startsWith(name)) {
-                    index = name.lastIndexOf('.');
+                name = packageName;
+            } else {
+                while (!packageName.startsWith(name)) {
+                    int index = name.lastIndexOf('.');
                     if (index < 0) {
                         helper.e(TAG, "No common package name found for all annotated classes.");
                     }
@@ -118,4 +113,13 @@ public class NavigationProcessor extends AbstractProcessor {
         return name;
     }
 
+    private void createFile(JavaFile file) {
+        if (file != null) {
+            try {
+                file.writeTo(helper.getEnv().getFiler());
+            } catch (IOException e) {
+                helper.e(TAG, e.getMessage());
+            }
+        }
+    }
 }
