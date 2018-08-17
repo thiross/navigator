@@ -60,11 +60,9 @@ public class NavigationProcessor extends AbstractProcessor {
         helper.i(TAG, String.format("Find common package name: %s", packageName));
         for (final TypeElement clazz : clazzSet) {
             final List<VariableElement> members = navigation.get(clazz);
-            if (members.size() > 0) {
-                final JavaFile file = new BundleBuilderGenerator(helper, clazz, members)
-                        .brewJava();
-                createFile(file);
-            }
+            final JavaFile file = new BundleBuilderGenerator(helper, clazz, members)
+                    .brewJava();
+            createFile(file);
         }
         return false;
     }

@@ -15,6 +15,27 @@ import com.tutuur.navigator.Navigation;
 public class MainActivity extends AppCompatActivity {
 
     @BundleExtra
+    boolean available;
+
+    @BundleExtra
+    byte b;
+
+    @BundleExtra
+    char c;
+
+    @BundleExtra
+    int age;
+
+    @BundleExtra
+    long timestamp;
+
+    @BundleExtra
+    float threshold;
+
+    @BundleExtra
+    double ratio;
+
+    @BundleExtra
     String id;
 
     /*

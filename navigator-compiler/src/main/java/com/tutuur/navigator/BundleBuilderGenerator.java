@@ -39,7 +39,7 @@ class BundleBuilderGenerator {
     }
 
     public JavaFile brewJava() {
-        if (clazz == null || members == null || members.isEmpty()) {
+        if (clazz == null || members == null) {
             return null;
         }
         final String packageName = helper.getPackageName(clazz);
@@ -91,9 +91,21 @@ class BundleBuilderGenerator {
             final Name name = member.getSimpleName();
             final String key = String.format(EXTRA_KEY_FORMAT, name);
             if (type == TypeName.BOOLEAN) {
+                methodBuilder.addStatement("var0.putBoolean($S, $N)", key, name);
+            } else if (type == TypeName.BYTE) {
+                methodBuilder.addStatement("var0.putByte($S, $N)", key, name);
+            } else if (type == TypeName.CHAR) {
+                methodBuilder.addStatement("var0.putChar($S, $N)", key, name);
+            } else if (type == TypeName.SHORT) {
                 methodBuilder.addStatement("var0.putShort($S, $N)", key, name);
+            } else if (type == TypeName.INT) {
+                methodBuilder.addStatement("var0.putInt($S, $N)", key, name);
             } else if (type == TypeName.LONG) {
                 methodBuilder.addStatement("var0.putLong($S, $N)", key, name);
+            } else if (type == TypeName.FLOAT) {
+                methodBuilder.addStatement("var0.putFloat($S, $N)", key, name);
+            } else if (type == TypeName.DOUBLE) {
+                methodBuilder.addStatement("var0.putDouble($S, $N)", key, name);
             } else if (helper.isString(member.asType())) {
                 methodBuilder.addStatement("var0.putString($S, $N)", key, name);
             }
