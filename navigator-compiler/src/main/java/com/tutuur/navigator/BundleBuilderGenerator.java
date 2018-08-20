@@ -219,19 +219,28 @@ class BundleBuilderGenerator {
         builder.addMethod(builder2.build());
     }
 
+    private void brewLocalInterceptors(MethodSpec.Builder builder) {
+        builder.addStatement("List<$T> interceptors = new $T<>()", ClassName.get(Interceptor.class), ClassName.get(ArrayList.class));
+        for (AnnotationValue ann : interceptors) {
+            TypeMirror type = (TypeMirror) ann.getValue();
+            builder.addStatement("interceptors.add(new $T())", type);
+        }
+    }
+
     private void brewStartActivityMethod(TypeSpec.Builder builder) {
         final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startActivity")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.VOID)
                 .addParameter(ClassName.get(Context.class), "context");
         if (!interceptors.isEmpty()) {
-            methodBuilder.beginControlFlow("if (intercept(context))")
+            brewLocalInterceptors(methodBuilder);
+            methodBuilder.beginControlFlow("if (intercept(interceptors, context))")
                     .addStatement("return")
                     .endControlFlow();
         }
         methodBuilder.addStatement("$T intent = newIntent(context)", ClassName.get(Intent.class));
         if (!interceptors.isEmpty()) {
-            methodBuilder.beginControlFlow("if (intercept(intent))")
+            methodBuilder.beginControlFlow("if (intercept(interceptors, intent))")
                     .addStatement("return")
                     .endControlFlow();
         }
@@ -246,17 +255,25 @@ class BundleBuilderGenerator {
                 .addParameter(TypeName.get(helper.ofType(clazz)), "context")
                 .addParameter(TypeName.INT, "requestCode");
         if (!interceptors.isEmpty()) {
-            methodBuilder.beginControlFlow("if (intercept(context))")
-                    .addStatement("return")
-                    .endControlFlow();
+            brewLocalInterceptors(methodBuilder);
         }
         if (TypeConstants.FQDN_ACTIVITY.equals(clazz)) {
+            if (!interceptors.isEmpty()) {
+                methodBuilder.beginControlFlow("if (intercept(interceptors, context))")
+                        .addStatement("return")
+                        .endControlFlow();
+            }
             methodBuilder.addStatement("$T intent = newIntent(context)", ClassName.get(Intent.class));
         } else {
+            if (!interceptors.isEmpty()) {
+                methodBuilder.beginControlFlow("if (intercept(interceptors, context.getContext()))")
+                        .addStatement("return")
+                        .endControlFlow();
+            }
             methodBuilder.addStatement("$T intent = newIntent(context.getContext())", ClassName.get(Intent.class));
         }
         if (!interceptors.isEmpty()) {
-            methodBuilder.beginControlFlow("if (intercept(intent))")
+            methodBuilder.beginControlFlow("if (intercept(interceptors, intent))")
                     .addStatement("return")
                     .endControlFlow();
         }
