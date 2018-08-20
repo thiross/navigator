@@ -24,6 +24,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 
 import static com.tutuur.navigator.NavigationProcessor.FILE_COMMENT;
 
@@ -101,32 +102,37 @@ class BundleBuilderGenerator {
         final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PRIVATE)
                 .returns(ClassName.get(Bundle.class))
-                .addStatement("$T var0 = new $T()", Bundle.class, Bundle.class);
+                .addStatement("$T b = new $T()", Bundle.class, Bundle.class);
         for (VariableElement member : members) {
-            final TypeName type = TypeName.get(member.asType());
+            final TypeMirror typeMirror = member.asType();
+            final TypeName type = TypeName.get(typeMirror);
             final Name name = member.getSimpleName();
             final String key = String.format(EXTRA_KEY_FORMAT, name);
             if (type == TypeName.BOOLEAN) {
-                methodBuilder.addStatement("var0.putBoolean($S, $N)", key, name);
+                methodBuilder.addStatement("b.putBoolean($S, this.$N)", key, name);
             } else if (type == TypeName.BYTE) {
-                methodBuilder.addStatement("var0.putByte($S, $N)", key, name);
+                methodBuilder.addStatement("b.putByte($S, this.$N)", key, name);
             } else if (type == TypeName.CHAR) {
-                methodBuilder.addStatement("var0.putChar($S, $N)", key, name);
+                methodBuilder.addStatement("b.putChar($S, this.$N)", key, name);
             } else if (type == TypeName.SHORT) {
-                methodBuilder.addStatement("var0.putShort($S, $N)", key, name);
+                methodBuilder.addStatement("b.putShort($S, this.$N)", key, name);
             } else if (type == TypeName.INT) {
-                methodBuilder.addStatement("var0.putInt($S, $N)", key, name);
+                methodBuilder.addStatement("b.putInt($S, this.$N)", key, name);
             } else if (type == TypeName.LONG) {
-                methodBuilder.addStatement("var0.putLong($S, $N)", key, name);
+                methodBuilder.addStatement("b.putLong($S, this.$N)", key, name);
             } else if (type == TypeName.FLOAT) {
-                methodBuilder.addStatement("var0.putFloat($S, $N)", key, name);
+                methodBuilder.addStatement("b.putFloat($S, this.$N)", key, name);
             } else if (type == TypeName.DOUBLE) {
-                methodBuilder.addStatement("var0.putDouble($S, $N)", key, name);
-            } else if (helper.isString(member.asType())) {
-                methodBuilder.addStatement("var0.putString($S, $N)", key, name);
+                methodBuilder.addStatement("b.putDouble($S, this.$N)", key, name);
+            } else if (helper.isString(typeMirror)) {
+                methodBuilder.addStatement("b.putString($S, this.$N)", key, name);
+            } else if (helper.isParcelable(typeMirror)) {
+                methodBuilder.addStatement("b.putParcelable($S, this.$N)", key, name);
+            } else if (helper.isSerializable(typeMirror)) {
+                methodBuilder.addStatement("b.putSerializable($S, this.$N)", key, name);
             }
         }
-        methodBuilder.addStatement("return var0");
+        methodBuilder.addStatement("return b");
         builder.addMethod(methodBuilder.build());
     }
 
@@ -175,7 +181,8 @@ class BundleBuilderGenerator {
                 .addStatement("Intent intent = target.getIntent()")
                 .addStatement("if (intent == null) return");
         for (VariableElement member : members) {
-            final TypeName type = TypeName.get(member.asType());
+            final TypeMirror typeMirror = member.asType();
+            final TypeName type = TypeName.get(typeMirror);
             final Name name = member.getSimpleName();
             final String key = String.format(EXTRA_KEY_FORMAT, name);
             String postfix;
@@ -195,8 +202,12 @@ class BundleBuilderGenerator {
                 postfix = "getFloatExtra($S, 0f)";
             } else if (type == TypeName.DOUBLE) {
                 postfix = "getDoubleExtra($S, 0.0)";
-            } else if (helper.isString(member.asType())) {
+            } else if (helper.isString(typeMirror)) {
                 postfix = "getStringExtra($S)";
+            } else if (helper.isParcelable(typeMirror)) {
+                postfix = "getParcelableExtra($S)";
+            } else if (helper.isSerializable(typeMirror)) {
+                postfix = "getSerializableExtra($S)";
             } else {
                 helper.e(TAG, String.format("%s in %s can't be handled.", name, clazz.getSimpleName()));
                 return;

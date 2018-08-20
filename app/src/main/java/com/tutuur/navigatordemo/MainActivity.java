@@ -57,10 +57,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateTo(View view) {
+        final Data data = new Data();
+        data.text = "N/A";
         Navigator.navigateToSecondActivity()
                 .email("fake@fake.fake")
                 .username("zale")
                 .timestamp(new Date().getTime())
+                .data(data)
                 .startActivity(this);
     }
 }

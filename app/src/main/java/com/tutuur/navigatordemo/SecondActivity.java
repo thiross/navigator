@@ -20,13 +20,16 @@ public class SecondActivity extends AppCompatActivity {
     @BundleExtra
     long timestamp;
 
+    @BundleExtra
+    Data data;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Navigator.bind(this);
         setContentView(R.layout.activity_second);
         TextView tv = findViewById(R.id.text_view);
-        tv.setText(username);
+        tv.setText(String.format("%s%s", username, data == null ? "null" : data.text));
     }
 
     public void navigateTo(View view) {
