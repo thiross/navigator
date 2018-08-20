@@ -4,36 +4,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Log;
-
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 import com.tutuur.util.AnnotationProcessorHelper;
 import com.tutuur.util.TypeConstants;
 
+import javax.lang.model.element.*;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.TypeMirror;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.TypeMirror;
 
 import static com.tutuur.navigator.NavigationProcessor.FILE_COMMENT;
 
@@ -57,6 +43,8 @@ class BundleBuilderGenerator {
 
     private final ClassName targetClassType;
 
+    private List<? extends AnnotationValue> interceptors;
+
     BundleBuilderGenerator(AnnotationProcessorHelper helper, TypeElement clazz, List<VariableElement> members) {
         this.helper = helper;
         this.clazz = clazz;
@@ -64,6 +52,7 @@ class BundleBuilderGenerator {
         this.targetPackageName = helper.getPackageName(clazz);
         this.targetClassName = String.format(CLASS_NAME_FORMAT, clazz.getSimpleName());
         this.targetClassType = ClassName.get(targetPackageName, targetClassName);
+        this.interceptors = Lists.newArrayList();
     }
 
     JavaFile brewJava() {
@@ -176,6 +165,7 @@ class BundleBuilderGenerator {
         builder.addMethod(methodBuilder.build());
     }
 
+    @SuppressWarnings("unchecked")
     private void brewInterceptMethod(TypeSpec.Builder builder) {
         final List<? extends AnnotationMirror> mirrors = clazz.getAnnotationMirrors();
         AnnotationMirror navigation = null;
@@ -198,15 +188,54 @@ class BundleBuilderGenerator {
         if (value == null) {
             return;
         }
-
+        interceptors = (List<? extends AnnotationValue>) value.getValue();
+        if (interceptors.isEmpty()) {
+            return;
+        }
+        ClassName interceptorClass = ClassName.get(Interceptor.class);
+        MethodSpec.Builder builder1 = MethodSpec.methodBuilder("intercept")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(TypeName.BOOLEAN)
+                .addParameter(ParameterizedTypeName.get(ClassName.get(List.class), interceptorClass), "interceptors")
+                .addParameter(ClassName.get(Context.class), "context");
+        MethodSpec.Builder builder2 = MethodSpec.methodBuilder("intercept")
+                .addModifiers(Modifier.PRIVATE)
+                .returns(TypeName.BOOLEAN)
+                .addParameter(ParameterizedTypeName.get(ClassName.get(List.class), interceptorClass), "interceptors")
+                .addParameter(ClassName.get(Intent.class), "intent");
+        builder1.beginControlFlow("for ($T i : interceptors)", interceptorClass)
+                .beginControlFlow("if (i.intercept(context))")
+                .addStatement("return true")
+                .endControlFlow()
+                .endControlFlow()
+                .addStatement("return false");
+        builder2.beginControlFlow("for ($T i : interceptors)", interceptorClass)
+                .beginControlFlow("if (i.intercept(intent))")
+                .addStatement("return true")
+                .endControlFlow()
+                .endControlFlow()
+                .addStatement("return false");
+        builder.addMethod(builder1.build());
+        builder.addMethod(builder2.build());
     }
 
     private void brewStartActivityMethod(TypeSpec.Builder builder) {
         final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startActivity")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.VOID)
-                .addParameter(ClassName.get(Context.class), "context")
-                .addStatement("context.startActivity(newIntent(context))");
+                .addParameter(ClassName.get(Context.class), "context");
+        if (!interceptors.isEmpty()) {
+            methodBuilder.beginControlFlow("if (intercept(context))")
+                    .addStatement("return")
+                    .endControlFlow();
+        }
+        methodBuilder.addStatement("$T intent = newIntent(context)", ClassName.get(Intent.class));
+        if (!interceptors.isEmpty()) {
+            methodBuilder.beginControlFlow("if (intercept(intent))")
+                    .addStatement("return")
+                    .endControlFlow();
+        }
+        methodBuilder.addStatement("context.startActivity(intent)");
         builder.addMethod(methodBuilder.build());
     }
 
@@ -216,11 +245,22 @@ class BundleBuilderGenerator {
                 .returns(TypeName.VOID)
                 .addParameter(TypeName.get(helper.ofType(clazz)), "context")
                 .addParameter(TypeName.INT, "requestCode");
-        if (TypeConstants.FQDN_ACTIVITY.equals(clazz)) {
-            methodBuilder.addStatement("context.startActivityForResult(newIntent(context), requestCode)");
-        } else {
-            methodBuilder.addStatement("context.startActivityForResult(newIntent(context.getContext()), requestCode)");
+        if (!interceptors.isEmpty()) {
+            methodBuilder.beginControlFlow("if (intercept(context))")
+                    .addStatement("return")
+                    .endControlFlow();
         }
+        if (TypeConstants.FQDN_ACTIVITY.equals(clazz)) {
+            methodBuilder.addStatement("$T intent = newIntent(context)", ClassName.get(Intent.class));
+        } else {
+            methodBuilder.addStatement("$T intent = newIntent(context.getContext())", ClassName.get(Intent.class));
+        }
+        if (!interceptors.isEmpty()) {
+            methodBuilder.beginControlFlow("if (intercept(intent))")
+                    .addStatement("return")
+                    .endControlFlow();
+        }
+        methodBuilder.addStatement("context.startActivityForResult(intent, requestCode)");
         builder.addMethod(methodBuilder.build());
     }
 
@@ -300,7 +340,7 @@ class BundleBuilderGenerator {
                 helper.e(TAG, String.format("Failed to parse scheme %s:`%s`.", e.getMessage(), scheme));
             }
         }
-        String code = String.format("{%s}", String.join(",", Lists.transform(patterns, new Function<String, String>() {
+        String code = String.format("{%s}", Joiner.on(',').join(Lists.transform(patterns, new Function<String, String>() {
             @Override
             public String apply(String input) {
                 return String.format("Pattern.compile(\"(?i)%s\")", input);
