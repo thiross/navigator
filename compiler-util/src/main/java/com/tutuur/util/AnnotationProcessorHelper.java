@@ -1,7 +1,12 @@
 package com.tutuur.util;
 
+import com.squareup.javapoet.ArrayTypeName;
+
+import java.util.List;
+
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
@@ -44,6 +49,35 @@ public class AnnotationProcessorHelper {
 
     public boolean isString(TypeMirror type) {
         return isSameType(type, TypeConstants.FQDN_STRING);
+    }
+
+    private boolean isSingleParameterizedType(TypeMirror type, TypeMirror parameterType, TypeMirror genericType) {
+        if (!(type instanceof DeclaredType)) {
+            return false;
+        }
+        final Types types = env.getTypeUtils();
+        genericType = types.erasure(genericType);
+        if (!(types.isAssignable(type, genericType))) {
+            return false;
+        }
+        final List<? extends TypeMirror> args = ((DeclaredType) type).getTypeArguments();
+        if (args.size() != 1) {
+            return false;
+        }
+        return types
+                .isAssignable(args.get(0), parameterType);
+    }
+
+    public boolean isStringList(TypeMirror type) {
+        return isSingleParameterizedType(type, ofType(TypeConstants.FQDN_STRING), ofType(TypeConstants.FQDN_LIST));
+    }
+
+    public boolean isParcelableList(TypeMirror type) {
+        return isSingleParameterizedType(type, ofType(TypeConstants.FQDN_PARCELABLE), ofType(TypeConstants.FQDN_LIST));
+    }
+
+    public boolean isSerializableList(TypeMirror type) {
+        return isSingleParameterizedType(type, ofType(TypeConstants.FQDN_SERIALIZABLE), ofType(TypeConstants.FQDN_LIST));
     }
 
     /**

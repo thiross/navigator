@@ -13,4 +13,6 @@ public interface TypeConstants {
     String FQDN_SUPPORT_FRAGMENT = "android.support.v4.app.Fragment";
 
     String FQDN_PARCELABLE = "android.os.Parcelable";
+
+    String FQDN_LIST = "java.util.List";
 }

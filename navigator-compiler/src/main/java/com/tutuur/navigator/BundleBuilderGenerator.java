@@ -3,6 +3,7 @@ package com.tutuur.navigator;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -16,6 +17,8 @@ import com.squareup.javapoet.TypeSpec;
 import com.tutuur.util.AnnotationProcessorHelper;
 import com.tutuur.util.TypeConstants;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -130,10 +133,27 @@ class BundleBuilderGenerator {
                 methodBuilder.addStatement("b.putParcelable($S, this.$N)", key, name);
             } else if (helper.isSerializable(typeMirror)) {
                 methodBuilder.addStatement("b.putSerializable($S, this.$N)", key, name);
+            } else if (helper.isStringList(typeMirror)) {
+                brewPutArrayListStatement(methodBuilder, key, name.toString(), String.class);
+            } else if (helper.isParcelableList(typeMirror)) {
+                brewPutArrayListStatement(methodBuilder, key, name.toString(), Parcelable.class);
+            } else if (helper.isSerializable(typeMirror)) {
+                brewPutArrayListStatement(methodBuilder, key, name.toString(), Serializable.class);
+            } else {
+                helper.e(TAG, String.format("putting type of `%s` in %s is not supported", name, clazz.getSimpleName()));
+                return;
             }
         }
         methodBuilder.addStatement("return b");
         builder.addMethod(methodBuilder.build());
+    }
+
+    private void brewPutArrayListStatement(MethodSpec.Builder builder, String key, String name, Class clazz) {
+        builder.beginControlFlow("if (this.$N != null)", name)
+                .addStatement("$T<$T> l = new $T()", ArrayList.class, clazz, ArrayList.class)
+                .addStatement("l.addAll(this.$N)", name)
+                .addStatement(String.format("b.put%sArrayList($S, l)", clazz.getSimpleName()), key)
+                .endControlFlow();
     }
 
     private void brewNewIntentMethod(TypeSpec.Builder builder) {
@@ -208,8 +228,14 @@ class BundleBuilderGenerator {
                 postfix = "getParcelableExtra($S)";
             } else if (helper.isSerializable(typeMirror)) {
                 postfix = "getSerializableExtra($S)";
+            } else if (helper.isStringList(typeMirror)) {
+                postfix = "getStringArrayListExtra($S)";
+            } else if (helper.isParcelableList(typeMirror)) {
+                postfix = "getParcelableArrayListExtra($S)";
+            } else if (helper.isSerializableList(typeMirror)) {
+                postfix = "getSerializableArrayListExtra($S)";
             } else {
-                helper.e(TAG, String.format("%s in %s can't be handled.", name, clazz.getSimpleName()));
+                helper.e(TAG, String.format("binding type of `%s` in %s is not supported", name, clazz.getSimpleName()));
                 return;
             }
             methodBuilder.addStatement(String.format("target.%s = intent.%s", name, postfix), key);

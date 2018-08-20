@@ -81,10 +81,12 @@ public class NavigatorGenerator {
             }
             ClassName clazz = ClassName.get(helper.getPackageName(element),
                     String.format(BundleBuilderGenerator.CLASS_NAME_FORMAT, element.getSimpleName()));
-            methodBuilder.addStatement(String.format("$T _%s = $T.parse(uri)", element.getSimpleName()), clazz, clazz)
-                    .beginControlFlow(String.format("if (_%s != null)", element.getSimpleName()))
-                    .addStatement(String.format("_%s.startActivity(context)", element.getSimpleName()))
+            methodBuilder.beginControlFlow("")
+                    .addStatement("$T b = $T.parse(uri)", clazz, clazz)
+                    .beginControlFlow("if (b != null)")
+                    .addStatement("b.startActivity(context)")
                     .addStatement("return true")
+                    .endControlFlow()
                     .endControlFlow();
         }
         methodBuilder.addStatement("return false");

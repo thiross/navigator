@@ -8,6 +8,8 @@ import android.widget.TextView;
 import com.tutuur.navigator.BundleExtra;
 import com.tutuur.navigator.Navigation;
 
+import java.util.List;
+
 @Navigation
 public class SecondActivity extends AppCompatActivity {
 
@@ -21,7 +23,13 @@ public class SecondActivity extends AppCompatActivity {
     long timestamp;
 
     @BundleExtra
-    Data data;
+    User user;
+
+    @BundleExtra
+    List<String> tags;
+
+    @BundleExtra
+    List<User> list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +37,11 @@ public class SecondActivity extends AppCompatActivity {
         Navigator.bind(this);
         setContentView(R.layout.activity_second);
         TextView tv = findViewById(R.id.text_view);
-        tv.setText(String.format("%s%s", username, data == null ? "null" : data.text));
+        tv.setText(String.format("%s  %s  %s  %s",
+                username,
+                user == null ? "null" : user.name,
+                (tags != null && tags.size() > 2) ? tags.get(1) : "null",
+                (list != null && list.size() > 2) ? list.get(1).name : "N/A"));
     }
 
     public void navigateTo(View view) {
