@@ -5,7 +5,9 @@ import android.os.Bundle;
 
 import com.tutuur.navigator.Navigation;
 
-@Navigation
+@Navigation(
+        schemes = "scheme://third"
+)
 public class ThirdActivity extends AppCompatActivity {
 
     @Override

@@ -1,20 +1,29 @@
 package com.tutuur.navigator;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import com.squareup.javapoet.*;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import com.tutuur.util.AnnotationProcessorHelper;
 import com.tutuur.util.TypeConstants;
+
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import java.net.URI;
-import java.util.List;
-import java.util.Locale;
 
 import static com.tutuur.navigator.NavigationProcessor.FILE_COMMENT;
 
@@ -32,30 +41,36 @@ class BundleBuilderGenerator {
 
     private final List<VariableElement> members;
 
+    private final String targetPackageName;
+
+    private final String targetClassName;
+
+    private final ClassName targetClassType;
+
     BundleBuilderGenerator(AnnotationProcessorHelper helper, TypeElement clazz, List<VariableElement> members) {
         this.helper = helper;
         this.clazz = clazz;
         this.members = members;
+        this.targetPackageName = helper.getPackageName(clazz);
+        this.targetClassName = String.format(CLASS_NAME_FORMAT, clazz.getSimpleName());
+        this.targetClassType = ClassName.get(targetPackageName, targetClassName);
     }
 
     JavaFile brewJava() {
         if (clazz == null || members == null) {
             return null;
         }
-        final String packageName = helper.getPackageName(clazz);
-        return JavaFile.builder(packageName, brewType(packageName))
+        return JavaFile.builder(targetPackageName, brewType())
                 .addFileComment(FILE_COMMENT)
                 .build();
     }
 
-    private TypeSpec brewType(String packageName) {
-        final String clazzName = String.format(CLASS_NAME_FORMAT, clazz.getSimpleName());
-        helper.i(TAG, String.format("Generating BundleBuilder: %s.%s", packageName, clazzName));
-        final ClassName clazzType = ClassName.get(packageName, clazzName);
-        TypeSpec.Builder builder = TypeSpec.classBuilder(clazzName)
+    private TypeSpec brewType() {
+        helper.i(TAG, String.format("Generating BundleBuilder: %s.%s", targetPackageName, targetClassName));
+        TypeSpec.Builder builder = TypeSpec.classBuilder(targetClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
         for (VariableElement member : members) {
-            brewAttribute(builder, clazzType, member);
+            brewAttribute(builder, member);
         }
         brewBuildMethod(builder);
         brewNewIntentMethod(builder);
@@ -68,7 +83,7 @@ class BundleBuilderGenerator {
         return builder.build();
     }
 
-    private void brewAttribute(TypeSpec.Builder builder, ClassName clazzType, VariableElement member) {
+    private void brewAttribute(TypeSpec.Builder builder, VariableElement member) {
         final String name = member.getSimpleName().toString();
         final TypeName type = TypeName.get(member.asType());
         builder.addField(type, name, Modifier.PRIVATE);
@@ -76,7 +91,7 @@ class BundleBuilderGenerator {
         builder.addMethod(MethodSpec.methodBuilder(name)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(type, "value")
-                .returns(clazzType)
+                .returns(targetClassType)
                 .addStatement(String.format("this.%s = value", name))
                 .addStatement("return this")
                 .build());
@@ -196,29 +211,84 @@ class BundleBuilderGenerator {
         if (navigation == null || navigation.schemes().length == 0) {
             return;
         }
-        int i = 0;
+        List<String> patterns = Lists.newArrayList();
         for (String scheme : navigation.schemes()) {
             helper.i(TAG, String.format("Processing scheme %s:`%s`", clazz.getSimpleName(), scheme));
             try {
-                URI uri = URI.create(scheme);
-                StringBuilder code = new StringBuilder("{")
-                        .append(String.format("\"%s\"", uri.getScheme()))
-                        .append(",")
-                        .append(String.format("\"%s\"", uri.getHost()))
-                        .append("}");
-                builder.addField(FieldSpec.builder(ArrayTypeName.get(String[].class), String.format(Locale.US, "SCHEME_%d", i))
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                        .initializer(code.toString())
-                        .build());
+                patterns.add(buildSchemePattern(scheme));
             } catch (Exception e) {
                 helper.e(TAG, String.format("Failed to parse scheme %s:`%s`.", e.getMessage(), scheme));
             }
-            ++i;
         }
+        String code = String.format("{%s}", String.join(",", Lists.transform(patterns, new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+                return String.format("Pattern.compile(\"(?i)%s\")", input);
+            }
+        })));
+        builder.addField(FieldSpec.builder(ArrayTypeName.get(Pattern[].class), "PATTERNS")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .initializer(code)
+                .build());
         final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("parse")
-                .addModifiers(Modifier.PUBLIC)
-                .returns(TypeName.VOID)
-                .addParameter(ClassName.get(String.class), "uri");
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(targetClassType)
+                .addParameter(ClassName.get(String.class), "uri")
+                .beginControlFlow("for (Pattern p : PATTERNS)")
+                .addStatement("$T m = p.matcher(uri)", Matcher.class)
+                .beginControlFlow("if (!m.find())")
+                .addStatement("return null")
+                .endControlFlow()
+                .addStatement("$T b = new $T()", targetClassType, targetClassType);
+
+        for (VariableElement member : members) {
+            final BundleExtra extra = member.getAnnotation(BundleExtra.class);
+            final String name = extra.value().equals("") ? member.getSimpleName().toString() : extra.value();
+            methodBuilder.beginControlFlow("if (m.group($S) != null)", name)
+                    .addStatement("String s = m.group($S)", name);
+            final TypeName type = TypeName.get(member.asType());
+            if (type == TypeName.BOOLEAN) {
+                methodBuilder.addStatement(String.format("b.%s = s.equalsIgnoreCase(\"true\") || s.equalsIgnoreCase(\"1\")", member.getSimpleName()));
+            } else if (type == TypeName.BYTE) {
+                methodBuilder.beginControlFlow("try")
+                        .addStatement(String.format("b.%s = Byte.parseByte(s)", member.getSimpleName()))
+                        .endControlFlow("catch(NumberFormatException e) { }");
+            } else if (type == TypeName.CHAR) {
+                methodBuilder.beginControlFlow("try")
+                        .addStatement(String.format("b.%s = s.charAt(0)", member.getSimpleName()))
+                        .endControlFlow("catch(StringIndexOutOfBoundsException e) { }");
+            } else if (type == TypeName.SHORT) {
+                methodBuilder.beginControlFlow("try")
+                        .addStatement(String.format("b.%s = Short.parseShort(s)", member.getSimpleName()))
+                        .endControlFlow("catch(NumberFormatException e) { }");
+            } else if (type == TypeName.INT) {
+                methodBuilder.beginControlFlow("try")
+                        .addStatement(String.format("b.%s = Integer.parseInt(s)", member.getSimpleName()))
+                        .endControlFlow("catch(NumberFormatException e) { }");
+            } else if (type == TypeName.LONG) {
+                methodBuilder.beginControlFlow("try")
+                        .addStatement(String.format("b.%s = Long.parseLong(s)", member.getSimpleName()))
+                        .endControlFlow("catch(NumberFormatException e) { }");
+            } else if (type == TypeName.FLOAT) {
+                methodBuilder.beginControlFlow("try")
+                        .addStatement(String.format("b.%s = Float.parseFloat(s)", member.getSimpleName()))
+                        .endControlFlow("catch(NumberFormatException e) { }");
+            } else if (type == TypeName.DOUBLE) {
+                methodBuilder.beginControlFlow("try")
+                        .addStatement(String.format("b.%s = Double.parseDouble(s)", member.getSimpleName()))
+                        .endControlFlow("catch(NumberFormatException e) { }");
+            } else if (helper.isString(member.asType())) {
+                methodBuilder.addStatement(String.format("b.%s = s", member.getSimpleName()));
+            }
+            methodBuilder.endControlFlow();
+        }
+        methodBuilder.addStatement("return b")
+                .endControlFlow()
+                .addStatement("return null");
         builder.addMethod(methodBuilder.build());
+    }
+
+    private String buildSchemePattern(String scheme) {
+        return scheme.replaceAll(":([^/]+)", "(?<$1>[^/]+)");
     }
 }

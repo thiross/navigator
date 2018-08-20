@@ -1,8 +1,10 @@
 package com.tutuur.navigatordemo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
 import com.tutuur.navigator.BundleExtra;
 import com.tutuur.navigator.Navigation;
 
@@ -10,7 +12,8 @@ import java.util.Date;
 
 @Navigation(
         schemes = {
-                "scheme://main/id",
+                "scheme://main/:id",
+                "test://main",
                 "https://www.tutuur.com/main/:id"
         }
 )
@@ -37,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     @BundleExtra
     double ratio;
 
-    @BundleExtra
+    @BundleExtra("uid")
     String id;
 
     /*
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateTo(View view) {
-        Navigator.gotoSecondActivity()
+        Navigator.navigateToSecondActivity()
                 .email("fake@fake.fake")
                 .username("zale")
                 .timestamp(new Date().getTime())
