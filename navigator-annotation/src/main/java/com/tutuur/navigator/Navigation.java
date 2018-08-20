@@ -15,4 +15,7 @@ import java.lang.annotation.Target;
 public @interface Navigation {
 
     String[] schemes() default {};
+
+    Class<? extends Interceptor>[] interceptors() default {};
+
 }

@@ -146,7 +146,7 @@ public class AnnotationProcessorHelper {
      * @param targetFqdn 目标类型FQDN字符串
      * @return 返回{@code true}如果完全匹配
      */
-    private boolean isSameType(TypeMirror type, String targetFqdn) {
+    public boolean isSameType(TypeMirror type, String targetFqdn) {
         Types types = env.getTypeUtils();
         return types.isSameType(type, ofType(targetFqdn));
     }

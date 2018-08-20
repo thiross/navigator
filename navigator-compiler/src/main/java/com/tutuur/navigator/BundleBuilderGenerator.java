@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -24,6 +25,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
@@ -80,6 +84,7 @@ class BundleBuilderGenerator {
         }
         brewBuildMethod(builder);
         brewNewIntentMethod(builder);
+        brewInterceptMethod(builder);
         brewStartActivityMethod(builder);
         brewStartActivityMethod(builder, TypeConstants.FQDN_ACTIVITY);
         brewStartActivityMethod(builder, TypeConstants.FQDN_FRAGMENT);
@@ -169,6 +174,31 @@ class BundleBuilderGenerator {
                 .addStatement("intent.putExtras(build())")
                 .addStatement("return intent");
         builder.addMethod(methodBuilder.build());
+    }
+
+    private void brewInterceptMethod(TypeSpec.Builder builder) {
+        final List<? extends AnnotationMirror> mirrors = clazz.getAnnotationMirrors();
+        AnnotationMirror navigation = null;
+        for (AnnotationMirror mirror : mirrors) {
+            if (helper.isSameType(mirror.getAnnotationType(), "com.tutuur.navigator.Navigation")) {
+                navigation = mirror;
+                break;
+            }
+        }
+        if (navigation == null) {
+            return;
+        }
+        AnnotationValue value = null;
+        for (ExecutableElement element : navigation.getElementValues().keySet()) {
+            if (element.getSimpleName().toString().equals("interceptors")) {
+                value = navigation.getElementValues().get(element);
+                break;
+            }
+        }
+        if (value == null) {
+            return;
+        }
+
     }
 
     private void brewStartActivityMethod(TypeSpec.Builder builder) {

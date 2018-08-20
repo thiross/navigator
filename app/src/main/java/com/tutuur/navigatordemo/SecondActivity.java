@@ -10,7 +10,7 @@ import com.tutuur.navigator.Navigation;
 
 import java.util.List;
 
-@Navigation
+@Navigation(interceptors = LoginInterceptor.class)
 public class SecondActivity extends AppCompatActivity {
 
     @BundleExtra
