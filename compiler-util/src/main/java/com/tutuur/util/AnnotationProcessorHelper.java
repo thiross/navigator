@@ -3,7 +3,6 @@ package com.tutuur.util;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
@@ -12,6 +11,7 @@ import javax.tools.Diagnostic;
  *
  * @author yujie
  */
+@SuppressWarnings("ALL")
 public class AnnotationProcessorHelper {
 
     private static final String MESSAGE_FORMAT = "[%s] %s";
