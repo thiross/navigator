@@ -1,23 +1,20 @@
 package com.tutuur.navigator;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 import com.tutuur.util.AnnotationProcessorHelper;
 import com.tutuur.util.TypeConstants;
-
-import java.util.List;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import java.net.URI;
+import java.util.List;
+import java.util.Locale;
 
 import static com.tutuur.navigator.NavigationProcessor.FILE_COMMENT;
 
@@ -67,6 +64,7 @@ class BundleBuilderGenerator {
         brewStartActivityMethod(builder, TypeConstants.FQDN_FRAGMENT);
         brewStartActivityMethod(builder, TypeConstants.FQDN_SUPPORT_FRAGMENT);
         brewBindMethod(builder);
+        brewParseMethod(builder);
         return builder.build();
     }
 
@@ -152,6 +150,9 @@ class BundleBuilderGenerator {
     }
 
     private void brewBindMethod(TypeSpec.Builder builder) {
+        if (members.isEmpty()) {
+            return;
+        }
         final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("bind")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                 .returns(TypeName.VOID)
@@ -187,6 +188,37 @@ class BundleBuilderGenerator {
             }
             methodBuilder.addStatement(String.format("target.%s = intent.%s", name, postfix), key);
         }
+        builder.addMethod(methodBuilder.build());
+    }
+
+    private void brewParseMethod(TypeSpec.Builder builder) {
+        Navigation navigation = clazz.getAnnotation(Navigation.class);
+        if (navigation == null || navigation.schemes().length == 0) {
+            return;
+        }
+        int i = 0;
+        for (String scheme : navigation.schemes()) {
+            helper.i(TAG, String.format("Processing scheme %s:`%s`", clazz.getSimpleName(), scheme));
+            try {
+                URI uri = URI.create(scheme);
+                StringBuilder code = new StringBuilder("{")
+                        .append(String.format("\"%s\"", uri.getScheme()))
+                        .append(",")
+                        .append(String.format("\"%s\"", uri.getHost()))
+                        .append("}");
+                builder.addField(FieldSpec.builder(ArrayTypeName.get(String[].class), String.format(Locale.US, "SCHEME_%d", i))
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                        .initializer(code.toString())
+                        .build());
+            } catch (Exception e) {
+                helper.e(TAG, String.format("Failed to parse scheme %s:`%s`.", e.getMessage(), scheme));
+            }
+            ++i;
+        }
+        final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("parse")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(TypeName.VOID)
+                .addParameter(ClassName.get(String.class), "uri");
         builder.addMethod(methodBuilder.build());
     }
 }

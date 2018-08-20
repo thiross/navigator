@@ -10,7 +10,7 @@ import java.util.Date;
 
 @Navigation(
         schemes = {
-                "scheme://main/:id",
+                "scheme://main/id",
                 "https://www.tutuur.com/main/:id"
         }
 )
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     double ratio;
 
     @BundleExtra
-    String id = "ABC";
+    String id;
 
     /*
     static class Inner {
