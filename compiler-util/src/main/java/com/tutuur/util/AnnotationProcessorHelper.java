@@ -1,7 +1,5 @@
 package com.tutuur.util;
 
-import com.squareup.javapoet.ArrayTypeName;
-
 import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -49,6 +47,19 @@ public class AnnotationProcessorHelper {
 
     public boolean isString(TypeMirror type) {
         return isSameType(type, TypeConstants.FQDN_STRING);
+    }
+
+    private boolean isArrayOf(TypeMirror type, TypeMirror elementType) {
+        final Types types = env.getTypeUtils();
+        return types.isAssignable(type, types.getArrayType(elementType));
+    }
+
+    public boolean isStringArray(TypeMirror type) {
+        return isArrayOf(type, ofType(TypeConstants.FQDN_STRING));
+    }
+
+    public boolean isParcelableArray(TypeMirror type) {
+        return isArrayOf(type, ofType(TypeConstants.FQDN_PARCELABLE));
     }
 
     private boolean isSingleParameterizedType(TypeMirror type, TypeMirror parameterType, TypeMirror genericType) {

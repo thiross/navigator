@@ -26,6 +26,12 @@ public class SecondActivity extends AppCompatActivity {
     User user;
 
     @BundleExtra
+    String[] array;
+
+    @BundleExtra
+    User[] userArray;
+
+    @BundleExtra
     List<String> tags;
 
     @BundleExtra
@@ -37,10 +43,11 @@ public class SecondActivity extends AppCompatActivity {
         Navigator.bind(this);
         setContentView(R.layout.activity_second);
         TextView tv = findViewById(R.id.text_view);
-        tv.setText(String.format("%s  %s  %s  %s",
+        tv.setText(String.format("%s %s %s %s %s",
                 username,
                 user == null ? "null" : user.name,
                 (tags != null && tags.size() > 2) ? tags.get(1) : "null",
+                (userArray != null && userArray.length > 5) ? userArray[4].name : "array",
                 (list != null && list.size() > 2) ? list.get(1).name : "N/A"));
     }
 

@@ -8,6 +8,7 @@ import com.tutuur.navigator.BundleExtra;
 import com.tutuur.navigator.Navigation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -63,23 +64,23 @@ public class MainActivity extends AppCompatActivity {
     public void navigateTo(View view) {
         final User user = new User();
         user.name = "David";
-
         List<String> list = new ArrayList<>();
         list.add("One");
         list.add("Two");
         list.add("Three");
-        List<User> users = new ArrayList<>();
-        users.add(user);
-        users.add(user);
-        users.add(user);
-        users.add(user);
+        User[] users = new User[10];
+        for (int i = 0; i < users.length; ++i) {
+            users[i] = new User();
+            users[i].name = String.format("David %d", i);
+        }
         Navigator.navigateToSecondActivity()
                 .email("fake@fake.fake")
                 .username("zale")
                 .timestamp(new Date().getTime())
                 .user(user)
+                .userArray(users)
                 .tags(list)
-                .list(users)
+                .list(Arrays.asList(users))
                 .startActivity(this);
     }
 }

@@ -19,6 +19,7 @@ import com.tutuur.util.TypeConstants;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +28,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeMirror;
 
 import static com.tutuur.navigator.NavigationProcessor.FILE_COMMENT;
@@ -129,6 +131,8 @@ class BundleBuilderGenerator {
                 methodBuilder.addStatement("b.putDouble($S, this.$N)", key, name);
             } else if (helper.isString(typeMirror)) {
                 methodBuilder.addStatement("b.putString($S, this.$N)", key, name);
+            } else if (helper.isStringArray(typeMirror)) {
+                methodBuilder.addStatement("b.putStringArray($S, this.$N)", key, name);
             } else if (helper.isParcelable(typeMirror)) {
                 methodBuilder.addStatement("b.putParcelable($S, this.$N)", key, name);
             } else if (helper.isSerializable(typeMirror)) {
@@ -224,6 +228,15 @@ class BundleBuilderGenerator {
                 postfix = "getDoubleExtra($S, 0.0)";
             } else if (helper.isString(typeMirror)) {
                 postfix = "getStringExtra($S)";
+            } else if (helper.isStringArray(typeMirror)) {
+                postfix = "getStringArrayExtra($S)";
+            } else if (helper.isParcelableArray(typeMirror)) {
+                final TypeMirror elementType = ((ArrayType) typeMirror).getComponentType();
+                methodBuilder.beginControlFlow("")
+                        .addStatement("Parcelable[] ps = intent.getParcelableArrayExtra($S)", key)
+                        .addStatement(String.format("target.%s = $T.copyOf(ps, ps.length, $T[].class)", name), Arrays.class, ClassName.get(elementType))
+                        .endControlFlow();
+                continue;
             } else if (helper.isParcelable(typeMirror)) {
                 postfix = "getParcelableExtra($S)";
             } else if (helper.isSerializable(typeMirror)) {
