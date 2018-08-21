@@ -1,0 +1,53 @@
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            groupId 'com.tutuur.android'
+            artifactId artifact
+            version '0.9.0'
+        }
+    }
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    publications = ['maven']
+
+    pkg {
+        repo = "mvn"
+        name = bintrayName
+        vcsUrl = "https://github.com/thiross/navigator.git"
+        websiteUrl = "https://github.com/thiross/navigator"
+        publish = true
+        publicDownloadNumbers = true
+        licenses = ['Apache-2.0']
+
+        version {
+            name = "0.9.0"
+            desc = "Alpha version."
+            released = new Date()
+        }
+    }
+}
+

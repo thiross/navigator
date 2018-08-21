@@ -1,5 +1,10 @@
 apply plugin: 'java-library'
 
+ext {
+    bintrayName = "compiler-util"
+    artifact = "compiler-util"
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -9,3 +14,5 @@ dependencies {
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
+apply from: '../upload-maven.gradle'
