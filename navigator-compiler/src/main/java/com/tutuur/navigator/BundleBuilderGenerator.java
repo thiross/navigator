@@ -2,24 +2,41 @@ package com.tutuur.navigator;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import com.tutuur.util.AnnotationProcessorHelper;
 import com.tutuur.util.TypeConstants;
 
-import javax.lang.model.element.*;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.TypeMirror;
 import java.io.Serializable;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.TypeMirror;
 
 import static com.tutuur.navigator.NavigationProcessor.FILE_COMMENT;
 
@@ -370,19 +387,27 @@ class BundleBuilderGenerator {
         final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("parse")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(targetClassType)
-                .addParameter(ClassName.get(String.class), "uri")
+                .addParameter(ClassName.get(String.class), "uriString")
+                .addStatement("int index = uriString.indexOf('?')")
+                .addStatement("String main = index >= 0 ? uriString.substring(0, index) : uriString")
                 .beginControlFlow("for (Pattern p : PATTERNS)")
-                .addStatement("$T m = p.matcher(uri)", Matcher.class)
+                .addStatement("$T m = p.matcher(main)", Matcher.class)
                 .beginControlFlow("if (!m.find())")
                 .addStatement("return null")
                 .endControlFlow()
                 .addStatement("$T b = new $T()", targetClassType, targetClassType);
-
+        if (!members.isEmpty()) {
+            methodBuilder.addStatement("$T uri = $T.parse(uriString)", Uri.class, Uri.class);
+        }
         for (VariableElement member : members) {
             final BundleExtra extra = member.getAnnotation(BundleExtra.class);
             final String name = extra.value().equals("") ? member.getSimpleName().toString() : extra.value();
-            methodBuilder.beginControlFlow("if (m.group($S) != null)", name)
-                    .addStatement("String s = m.group($S)", name);
+            methodBuilder.beginControlFlow("")
+                    .addStatement("String s = m.group($S)", name)
+                    .beginControlFlow("if (s == null)")
+                    .addStatement("s = uri.getQueryParameter($S)", name)
+                    .endControlFlow()
+                    .beginControlFlow("if (s != null)", name);
             final TypeName type = TypeName.get(member.asType());
             if (type == TypeName.BOOLEAN) {
                 methodBuilder.addStatement(String.format("b.%s = s.equalsIgnoreCase(\"true\") || s.equalsIgnoreCase(\"1\")", member.getSimpleName()));
@@ -417,7 +442,8 @@ class BundleBuilderGenerator {
             } else if (helper.isString(member.asType())) {
                 methodBuilder.addStatement(String.format("b.%s = s", member.getSimpleName()));
             }
-            methodBuilder.endControlFlow();
+            methodBuilder.endControlFlow()
+                    .endControlFlow();
         }
         methodBuilder.addStatement("return b")
                 .endControlFlow()
