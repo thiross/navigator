@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Navigator Demo</string>
+    <string name="intent_navigation">Intent跳转</string>
 </resources>

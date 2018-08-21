@@ -1,4 +1,4 @@
-package com.tutuur.navigatordemo;
+package com.tutuur.navigatordemo.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

@@ -5,20 +5,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.tutuur.navigator.BundleExtra;
-import com.tutuur.navigator.Navigation;
+import com.tutuur.navigatordemo.model.User;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-@Navigation(
-        schemes = {
-                "scheme://main/:id",
-                "test://main",
-                "https://www.tutuur.com/main/:id"
-        }
-)
 public class MainActivity extends AppCompatActivity {
 
     @BundleExtra
@@ -62,25 +55,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateTo(View view) {
-        final User user = new User();
-        user.name = "David";
-        List<String> list = new ArrayList<>();
-        list.add("One");
-        list.add("Two");
-        list.add("Three");
-        User[] users = new User[10];
-        for (int i = 0; i < users.length; ++i) {
-            users[i] = new User();
-            users[i].name = String.format("David %d", i);
-        }
         Navigator.navigateToSecondActivity()
-                .email("fake@fake.fake")
-                .username("zale")
-                .timestamp(new Date().getTime())
-                .user(user)
-                .userArray(users)
-                .tags(list)
-                .list(Arrays.asList(users))
                 .startActivity(this);
     }
 }

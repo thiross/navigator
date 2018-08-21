@@ -8,6 +8,7 @@ import android.widget.TextView;
 import com.tutuur.navigator.BundleExtra;
 import com.tutuur.navigator.Navigation;
 import com.tutuur.navigatordemo.interceptor.LoginInterceptor;
+import com.tutuur.navigatordemo.model.User;
 
 import java.util.List;
 
