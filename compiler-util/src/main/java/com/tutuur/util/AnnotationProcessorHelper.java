@@ -10,7 +10,7 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
 /**
- * {@code AnnotationProcessor}帮助类
+ * {@code AnnotationProcessor} utilities.
  *
  * @author yujie
  */
@@ -24,10 +24,10 @@ public class AnnotationProcessorHelper {
     private final boolean debug;
 
     /**
-     * 从ProcessingEnvironment获取相关参数，构造实例
+     * Create instance of this utitlity.
      *
-     * @param env   AnnotationProcessor对应的环境
-     * @param debug 是否开启Debug模式.
+     * @param env   AnnotationProcessor environment.
+     * @param debug More logs when set true.
      */
     public AnnotationProcessorHelper(ProcessingEnvironment env, boolean debug) {
         this.env = env;
@@ -92,10 +92,10 @@ public class AnnotationProcessorHelper {
     }
 
     /**
-     * 判断是否是Activity
+     * Activity test.
      *
-     * @param type 待判断的类型
-     * @return 返回{@code} 如果{@code type}继承自{@code Activity}
+     * @param type The type.
+     * @return {@code true} if {@code type} inherts from {@code Activity}
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isActivity(TypeMirror type) {
@@ -103,10 +103,10 @@ public class AnnotationProcessorHelper {
     }
 
     /**
-     * 判断是否是Fragment
+     * Fragment test.
      *
-     * @param type 待判断的类型
-     * @return 返回{@code} 如果{@code type}继承自{@code Fragment}
+     * @param type The type.
+     * @return {@code true} if {@code type} inherits from {@code Fragment}
      */
     public boolean isFragment(TypeMirror type) {
         return isAssignable(type, TypeConstants.FQDN_FRAGMENT)
@@ -127,11 +127,11 @@ public class AnnotationProcessorHelper {
     }
 
     /**
-     * 判断{@code type}是否可赋值到{@code targetFqdn}类型
+     * Test {@code type} is assignable to {@code targetFqdn}.
      *
-     * @param type       待判断的类型
-     * @param targetFqdn 目标类型FQDN字符串
-     * @return 返回{@code true}如果可以赋值
+     * @param type       The source type.
+     * @param targetFqdn The target type FQDN.
+     * @return {@code true} if assignable.
      */
     private boolean isAssignable(TypeMirror type, String targetFqdn) {
         Types types = env.getTypeUtils();
@@ -140,11 +140,11 @@ public class AnnotationProcessorHelper {
 
 
     /**
-     * 判断{@code type}是否完全匹配{@code targetFqdn}类型
+     * Test {@code type} is the same type of {@code targetFqdn}.
      *
-     * @param type       待判断的类型
-     * @param targetFqdn 目标类型FQDN字符串
-     * @return 返回{@code true}如果完全匹配
+     * @param type       The source type.
+     * @param targetFqdn The target type FQDN
+     * @return {@code true} if is the same.
      */
     public boolean isSameType(TypeMirror type, String targetFqdn) {
         Types types = env.getTypeUtils();

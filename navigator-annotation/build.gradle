@@ -1,5 +1,15 @@
 apply plugin: 'java-library'
 
+ext {
+    bintrayName = "navigator-annotation"
+
+    libraryName = "Navigator annotation"
+
+    artifact = "navigator-annotation"
+
+    libraryDescription = "Android activity navigation annotations."
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.google.android:android:4.1.1.4'
@@ -7,3 +17,4 @@ dependencies {
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+

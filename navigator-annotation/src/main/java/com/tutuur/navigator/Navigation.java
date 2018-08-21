@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 标记当前页面的路由信息
+ * @author yujie
  */
 @Documented
 @Retention(RetentionPolicy.CLASS)
