@@ -20,7 +20,7 @@ publishing {
 
             groupId 'com.tutuur.android'
             artifactId artifact
-            version '0.9.1'
+            version '0.9.3'
         }
     }
 }
@@ -44,7 +44,7 @@ bintray {
         licenses = ['Apache-2.0']
 
         version {
-            name = "0.9.1"
+            name = "0.9.3"
             desc = "Beta version."
             released = new Date()
         }

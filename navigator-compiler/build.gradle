@@ -9,8 +9,8 @@ ext {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    api 'com.tutuur.android:compiler-util:0.9.1'
-    implementation 'com.tutuur.android:navigator-annotation:0.9.1'
+    api 'com.tutuur.android:compiler-util:0.9.3'
+    implementation 'com.tutuur.android:navigator-annotation:0.9.3'
 
     api 'com.squareup:javapoet:1.11.1'
     implementation 'com.google.android:android:4.1.1.4'

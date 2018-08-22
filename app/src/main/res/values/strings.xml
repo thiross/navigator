@@ -3,4 +3,6 @@
     <string name="intent_navigation">Intent跳转</string>
     <string name="scheme_navigation">example://third/david?query=abc</string>
     <string name="http_navigation">http://www.example.com/third?query=http</string>
+    <string name="base_navigation">To Base</string>
+    <string name="derived_navigation">To Derived</string>
 </resources>

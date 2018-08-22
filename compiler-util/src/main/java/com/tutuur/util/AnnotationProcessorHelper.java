@@ -151,6 +151,11 @@ public class AnnotationProcessorHelper {
         return types.isSameType(type, ofType(targetFqdn));
     }
 
+    public boolean isSameType(TypeMirror type1, TypeMirror type2) {
+        return env.getTypeUtils()
+                .isSameType(type1, type2);
+    }
+
     public void i(String tag, String message) {
         if (debug) {
             env.getMessager()

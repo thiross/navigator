@@ -9,9 +9,6 @@ import android.widget.Button;
 import com.tutuur.navigator.BundleExtra;
 import com.tutuur.navigatordemo.model.User;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -71,6 +68,17 @@ public class MainActivity extends AppCompatActivity {
                 if (view instanceof Button) {
                     Navigator.navigateTo(this, ((Button) view).getText().toString());
                 }
+                break;
+            case R.id.intent_base:
+                Navigator.navigateToBaseActivity()
+                        .valueInBase("base")
+                        .startActivity(this);
+                break;
+            case R.id.intent_derived:
+                Navigator.navigateToDerivedActivity()
+                        .valueInBase("base-derived")
+                        .valueInDerived("derived")
+                        .startActivity(this);
                 break;
         }
         Log.d(TAG, "end navigation.");

@@ -83,7 +83,7 @@ class BundleBuilderGenerator {
     private TypeSpec brewType() {
         helper.i(TAG, String.format("Generating BundleBuilder: %s.%s", targetPackageName, targetClassName));
         TypeSpec.Builder builder = TypeSpec.classBuilder(targetClassName)
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+                .addModifiers(Modifier.PUBLIC);
         for (VariableElement member : members) {
             brewAttribute(builder, member);
         }

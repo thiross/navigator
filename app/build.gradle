@@ -21,9 +21,9 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.tutuur.android:navigator-annotation:0.9.1'
-    annotationProcessor 'com.tutuur.android:navigator-compiler:0.9.1'
-    // annotationProcessor project(':navigator-compiler')
+    implementation 'com.tutuur.android:navigator-annotation:0.9.3'
+    annotationProcessor 'com.tutuur.android:navigator-compiler:0.9.3'
+    annotationProcessor project(':navigator-compiler')
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     testImplementation 'junit:junit:4.12'

@@ -128,7 +128,7 @@ repositories {
     }
 }
 dependencies {
-    implementation 'com.tutuur.android:navigator-annotation:0.9.1'
-    annotationProcessor 'com.tutuur.android:navigator-compiler:0.9.1'
+    implementation 'com.tutuur.android:navigator-annotation:0.9.3'
+    annotationProcessor 'com.tutuur.android:navigator-compiler:0.9.3'
 }
 ```

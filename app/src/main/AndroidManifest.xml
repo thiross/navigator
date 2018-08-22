@@ -27,6 +27,8 @@
         <activity
             android:name=".LoginActivity"
             android:label="Login" />
+        <activity android:name=".BaseActivity" />
+        <activity android:name=".DerivedActivity"></activity>
     </application>
 
 </manifest>

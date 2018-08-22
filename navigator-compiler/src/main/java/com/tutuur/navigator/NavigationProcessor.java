@@ -1,6 +1,7 @@
 package com.tutuur.navigator;
 
 import com.google.auto.service.AutoService;
+import com.google.common.collect.Lists;
 import com.squareup.javapoet.JavaFile;
 import com.tutuur.util.AnnotationProcessorHelper;
 
@@ -53,7 +54,7 @@ public class NavigationProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment env) {
         Map<TypeElement, List<VariableElement>> navigation = buildNavigation(env);
-        if (navigation.isEmpty()) {
+        if (navigation == null || navigation.isEmpty()) {
             helper.i(TAG, "No navigation class found.");
             return false;
         }
@@ -61,7 +62,7 @@ public class NavigationProcessor extends AbstractProcessor {
         final String packageName = findPackageName(clazzSet);
         helper.i(TAG, String.format("Find common package name: %s", packageName));
         for (final TypeElement clazz : clazzSet) {
-            final List<VariableElement> members = navigation.get(clazz);
+            final List<VariableElement> members = getAllMembers(clazz, navigation);
             final JavaFile file = new BundleBuilderGenerator(helper, clazz, members)
                     .brewJava();
             createFile(file);
@@ -71,17 +72,46 @@ public class NavigationProcessor extends AbstractProcessor {
         return false;
     }
 
+    private List<VariableElement> getAllMembers(TypeElement clazz, Map<TypeElement, List<VariableElement>> clazzMap) {
+        List<VariableElement> members = Lists.newArrayList();
+        members.addAll(clazzMap.get(clazz));
+        TypeElement base = clazz;
+        boolean found;
+        do {
+            found = false;
+            for (TypeElement t : clazzMap.keySet()) {
+                if (helper.isSameType(t.asType(), base.getSuperclass())) {
+                    members.addAll(clazzMap.get(t));
+                    base = t;
+                    found = true;
+                    break;
+                }
+            }
+        } while (found);
+
+        return members;
+    }
+
     private Map<TypeElement, List<VariableElement>> buildNavigation(RoundEnvironment env) {
         Map<TypeElement, List<VariableElement>> navigation = new HashMap<>();
         for (Element element : env.getElementsAnnotatedWith(BundleExtra.class)) {
             final TypeElement clazz = (TypeElement) element.getEnclosingElement();
             if (!helper.isActivity(clazz.asType())) {
                 helper.e(TAG, String.format("%s is annotated with @BundleExtra but %s is not a Activity", element.getSimpleName(), clazz.getQualifiedName()));
+                return null;
             }
-            if (!navigation.containsKey(clazz)) {
+            TypeElement key = null;
+            for (TypeElement t : navigation.keySet()) {
+                if (t.equals(clazz)) {
+                    key = t;
+                    break;
+                }
+            }
+            if (key == null) {
+                key = clazz;
                 navigation.put(clazz, new ArrayList<VariableElement>());
             }
-            navigation.get(clazz)
+            navigation.get(key)
                     .add((VariableElement) element);
         }
         for (Element element : env.getElementsAnnotatedWith(Navigation.class)) {
