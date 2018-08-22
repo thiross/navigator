@@ -1,21 +1,19 @@
-## 路由工具类
-### 简介
-Navigator参考了[Dart](https://github.com/f2prateek/dart)的实现，把Dart简化并增加了跳转拦截器和scheme支持。主要功能有：
-1. Activity跳转并支持参数传递
-2. scheme跳转并支持参数传递
-3. 跳转拦截器
+## Navigator annotation processor.
+### Introduction
+Navigator is a android navigation library, a simplified version of [Dart](https://github.com/f2prateek/dart), with some new features: 
+1. Navigation interceptor.
+3. Scheme support.
 
-### 使用指南
+### Guide
 #### `@Navigation`
-`@Navigation`用来注解需要跳转的Activity比如：
+Annotate a Activity with: `@Navigation` 
 ``` Java
 @Navigation
 public class SecondActivity extends AppCompatActivity {
     ...
 }
 ```
-
-`navigator-compiler`会在所有标记`@Navigation`类的最长公共package下生成一个`Navigator`类，用以跳转，比如上例就可以用如下方法跳转到`SecondActivity`:
+And the processor will generate a class `Navigator` in longest common parent package of all annotated `Activity`s. Call the following method to start a new instance of `SecondActivity`: 
 ``` Java
 Navigator.navigateToSecondActivity()
     .startActivity(context);
@@ -26,10 +24,10 @@ Navigator.navigateToSecondActivity()
 Navigator.navigateToSecondActivity()
     .startActivity(fragment, requestCode);
 ```
-跳转类的方法名为`navigateToActivityName`
+The genereted method name is: `navigateTo`*ActivityName*
 
 #### `@BundleExtra`
-`@BundleExtra`用来注解类成员。含有`@BundleExtra`注解成员的Activity可以省略`@Navigation`注解。例如：
+All fields of `Activity` annotated by `@BundleExtra` will have `setter`s in the return value of `navigateToXXX` method. You can set and pass them to target `Activity`. If any fields of `Activity` is annotated by `@BundleExtra`, the `@Navigation` annotation is optional. For example:
 ``` Java
 public class SecondActivity extends AppCompatActivity {
 
@@ -38,20 +36,21 @@ public class SecondActivity extends AppCompatActivity {
     ...
 }
 ```
-
-跳转的时候可以通过如下方法传递`username`给`SecondActivity`:
+Pass the `username` field as:
 ``` Java
 Navigator.navigateToSecondActivity()
     .username("David")
     .startActivity(this);
 ```
-`SecondActivity`需要在`Acitivity.onCreate`函数里用如下方法将`Intent`的Extra信息绑定到`Activity`：
+
+To retieve the field values in the target `Activity`, please call `Navigator.bind` method:
 ``` Java
 // in SecondActivity.onCreate(...)
 Navigator.bind(this);
+// this.username is set.
 ```
 
-目前@BundleExtra支持的类型有：
+`@BundleExtra` support types:
 * `char`
 * `byte`
 * `short`
@@ -68,8 +67,8 @@ Navigator.bind(this);
 * `List<Parcelable>`
 * `List<Serializable>`
 
-#### 跳转拦截
-`@Navigation`的`interceptors`成员可以指定跳转拦截器的`Class`对象列表，如：
+#### Interceptor
+`@Navigation` has a field named `interceptors`, it's list of `Class` which implements `Interceptor`. A new instance list of types in `interceptor` is created before navigating. The `intercept` method of `Interceptor` is called one by one until anyone of them returns `true`
 ``` Java
 @Navigation(interceptors = LoginInterceptor.class)
 public class SecondActivity extends AppCompatActivity {
@@ -77,10 +76,10 @@ public class SecondActivity extends AppCompatActivity {
 }
 ```
 
-这个列表的类必须实现`Interceptor`接口，如下简单的登录拦截器实现：
+An example of `Interceptor` implementation:
 ``` Java
 public class LoginInterceptor implements Interceptor {
-
+    // Called before building a Intent.
     @Override
     public boolean intercept(Context context) {
         if (Math.random() > 0.5) {
@@ -91,6 +90,8 @@ public class LoginInterceptor implements Interceptor {
         return true;
     }
 
+    // Called after a new Intent is created.
+    // You can put extras to intent.
     @Override
     public boolean intercept(Intent intent) {
         return false;
@@ -98,28 +99,30 @@ public class LoginInterceptor implements Interceptor {
 }
 ```
 
-#### scheme支持
-`@Navigation`的`schemes`成员可以制定scheme跳转，如：
+#### Scheme
+Another field of `@Navigation` is `schemes`, you can add you custom schemes to this list. For example:
 ``` Java
 @Navigation(schemes = {"example://third", "example://third2/:path", "http://www.example.com/third"})
 public class ThirdActivity extends AppCompatActivity {
     ...
 }
 ```
-注意：标记scheme时**不支持**query string(e.g. ?query=abc)，需要去掉
+Warning：The scheme should contains **NO** query string(e.g. ?query=abc)
 
-当需要根据scheme跳转只需要执行:
+When navigating by scheme:
 ``` Java
 Navigator.navigateTo(context, "example://third?query=abc");
 ```
-跳转的时候可以带query参数，并且参数将通过`Navigator.bind`绑定到对应的`@BundleExtra`标记的成员，对应规则如下：
-1. `@BundleExtra`标记的成员默认参数名为成员名字，比如：`String username`的参数明为`"username"`，也可以通过`@BundleExtra("n")`指定参数名为`"n"`。
-2. 所有用`:`标记的路径变量和所有URL Query参数都会放到一个`Map`里面，然后根据1里面对应的参数名，从这个列表获取参数
 
-### 下载
+Rules to extract argument from `url` is:
+1. Every field annotated by `@BundleExtra` is mapped to a `key`
+2. Default `key` is field name，e.g：key of `String username` is `"username"`，alternatively you can set a `key` by the `value` field of `@BundleExtra`. e.g. `@BundleExtra("n")` has a `key`: `"n"`
+3. Any segment in scheme path start with `':'` and all query strings are put into a `(key, value)` map. The compiler try to extract all `value`s to related `key`s.
+
+### Download
 ```
 repositories {
-    // 正在迁移到Jcenter
+    // Jcenter migration is applied.
     maven {
         url 'https://dl.bintray.com/thiross/mvn/'
     }
