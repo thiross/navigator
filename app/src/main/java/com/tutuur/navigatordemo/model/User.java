@@ -20,6 +20,10 @@ public class User implements Parcelable {
     public User() {
     }
 
+    public User(String name) {
+        this.name = name;
+    }
+
     private User(Parcel in) {
         this.name = in.readString();
     }

@@ -106,7 +106,7 @@ public class ThirdActivity extends AppCompatActivity {
     ...
 }
 ```
-注意：标记scheme时_不支持_ query string(e.g. ?query=abc)，需要去掉
+注意：标记scheme时**不支持**query string(e.g. ?query=abc)，需要去掉
 
 当需要根据scheme跳转只需要执行:
 ``` Java
@@ -119,7 +119,7 @@ Navigator.navigateTo(context, "example://third?query=abc");
 ### 下载
 ```
 dependencies {
-    implementation 'com.tutuur.android:navigator-annotation:0.9.0'
-    annotationProcessor 'com.tutuur.android:navigator-compiler:0.9.0'
+    implementation 'com.tutuur.android:navigator-annotation:0.9.1'
+    annotationProcessor 'com.tutuur.android:navigator-compiler:0.9.1'
 }
 ```

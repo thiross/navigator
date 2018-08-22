@@ -21,7 +21,6 @@ import com.tutuur.util.AnnotationProcessorHelper;
 import com.tutuur.util.TypeConstants;
 
 import java.io.Serializable;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -165,7 +164,7 @@ class BundleBuilderGenerator {
 
     private void brewPutArrayListStatement(MethodSpec.Builder builder, String key, String name, Class clazz) {
         builder.beginControlFlow("if (this.$N != null)", name)
-                .addStatement("$T<$T> l = new $T()", ArrayList.class, clazz, ArrayList.class)
+                .addStatement("$T<$T> l = new $T<>()", ArrayList.class, clazz, ArrayList.class)
                 .addStatement("l.addAll(this.$N)", name)
                 .addStatement(String.format("b.put%sArrayList($S, l)", clazz.getSimpleName()), key)
                 .endControlFlow();
@@ -393,7 +392,7 @@ class BundleBuilderGenerator {
                 .beginControlFlow("for (Pattern p : PATTERNS)")
                 .addStatement("$T m = p.matcher(main)", Matcher.class)
                 .beginControlFlow("if (!m.find())")
-                .addStatement("return null")
+                .addStatement("continue")
                 .endControlFlow()
                 .addStatement("$T b = new $T()", targetClassType, targetClassType);
         if (!members.isEmpty()) {
@@ -403,7 +402,10 @@ class BundleBuilderGenerator {
             final BundleExtra extra = member.getAnnotation(BundleExtra.class);
             final String name = extra.value().equals("") ? member.getSimpleName().toString() : extra.value();
             methodBuilder.beginControlFlow("")
-                    .addStatement("String s = m.group($S)", name)
+                    .addStatement("String s = null")
+                    .beginControlFlow("try")
+                    .addStatement("s = m.group($S)", name)
+                    .endControlFlow("catch($T e) {}", IllegalArgumentException.class)
                     .beginControlFlow("if (s == null)")
                     .addStatement("s = uri.getQueryParameter($S)", name)
                     .endControlFlow()
@@ -452,6 +454,7 @@ class BundleBuilderGenerator {
     }
 
     private String buildSchemePattern(String scheme) {
-        return scheme.replaceAll(":([^/]+)", "(?<$1>[^/]+)");
+        return scheme.replaceAll("\\.", "\\\\\\\\.")
+                .replaceAll(":([^/]+)", "(?<$1>[^/]+)");
     }
 }

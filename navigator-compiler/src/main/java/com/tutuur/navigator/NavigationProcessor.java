@@ -47,7 +47,7 @@ public class NavigationProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment env) {
         super.init(env);
-        helper = new AnnotationProcessorHelper(env, true);
+        helper = new AnnotationProcessorHelper(env, false);
     }
 
     @Override

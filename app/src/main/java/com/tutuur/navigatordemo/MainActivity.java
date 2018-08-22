@@ -59,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.intent_nav:
                 Navigator.navigateToSecondActivity()
-                        .username("David")
+                        .from("MainActivity")
+                        .user(new User("David"))
                         .startActivity(this);
             case R.id.intent_scheme:
             case R.id.intent_http:

@@ -2,5 +2,5 @@
     <string name="app_name">Navigator Demo</string>
     <string name="intent_navigation">Intent跳转</string>
     <string name="scheme_navigation">example://third/david?query=abc</string>
-    <string name="http_navigation">http://www.example.com/third?name=abc</string>
+    <string name="http_navigation">http://www.example.com/third?query=http</string>
 </resources>

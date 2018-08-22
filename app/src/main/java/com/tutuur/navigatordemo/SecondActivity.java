@@ -16,12 +16,18 @@ import java.util.List;
 public class SecondActivity extends AppCompatActivity {
 
     @BundleExtra
-    String username;
+    String from;
+
+    @BundleExtra
+    User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Navigator.bind(this);
         setContentView(R.layout.activity_second);
+        TextView text = findViewById(R.id.text_view);
+        String username = user == null ? "N/A" : user.name;
+        text.setText(String.format("%s says hello from %s", username, from));
     }
 }
