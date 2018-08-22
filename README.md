@@ -50,7 +50,7 @@ Navigator.bind(this);
 // this.username is set.
 ```
 
-`@BundleExtra` support types:
+`@BundleExtra` supports types:
 * `char`
 * `byte`
 * `short`
@@ -68,7 +68,7 @@ Navigator.bind(this);
 * `List<Serializable>`
 
 #### Interceptor
-`@Navigation` has a field named `interceptors`, it's list of `Class` which implements `Interceptor`. A new instance list of types in `interceptor` is created before navigating. The `intercept` method of `Interceptor` is called one by one until anyone of them returns `true`
+`@Navigation` has a field named `interceptors`, it's list of `Class` which implements `Interceptor`. A new instance list of types in `interceptors` is created before navigating. The `intercept` method of `Interceptor` is called one by one until anyone of them returns `true`
 ``` Java
 @Navigation(interceptors = LoginInterceptor.class)
 public class SecondActivity extends AppCompatActivity {
