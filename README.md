@@ -118,6 +118,12 @@ Navigator.navigateTo(context, "example://third?query=abc");
 
 ### 下载
 ```
+repositories {
+    // 正在迁移到Jcenter
+    maven {
+        url 'https://dl.bintray.com/thiross/mvn/'
+    }
+}
 dependencies {
     implementation 'com.tutuur.android:navigator-annotation:0.9.1'
     annotationProcessor 'com.tutuur.android:navigator-compiler:0.9.1'

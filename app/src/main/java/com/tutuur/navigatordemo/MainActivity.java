@@ -2,6 +2,7 @@ package com.tutuur.navigatordemo;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -14,6 +15,8 @@ import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private final String TAG = MainActivity.class.getSimpleName();
 
     @BundleExtra
     boolean available = true;
@@ -56,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateTo(View view) {
+        Log.d(TAG, "start navigation.");
         switch (view.getId()) {
             case R.id.intent_nav:
                 Navigator.navigateToSecondActivity()
@@ -69,5 +73,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
         }
+        Log.d(TAG, "end navigation.");
     }
 }
