@@ -11,5 +11,18 @@
         android:id="@+id/intent_nav"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/intent_navigation" />
+        android:text="@string/intent_navigation"
+        android:onClick="navigateTo"/>
+    <Button
+        android:id="@+id/intent_scheme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/scheme_navigation"
+        android:onClick="navigateTo"/>
+    <Button
+        android:id="@+id/intent_http"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/http_navigation"
+        android:onClick="navigateTo"/>
 </LinearLayout>

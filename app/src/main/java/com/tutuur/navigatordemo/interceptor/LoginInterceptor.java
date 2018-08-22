@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.tutuur.navigator.Interceptor;
+import com.tutuur.navigatordemo.Navigator;
 
 public class LoginInterceptor implements Interceptor {
 
@@ -12,6 +13,8 @@ public class LoginInterceptor implements Interceptor {
         if (Math.random() > 0.5) {
             return false;
         }
+        Navigator.navigateToLoginActivity()
+                .startActivity(context);
         return true;
     }
 

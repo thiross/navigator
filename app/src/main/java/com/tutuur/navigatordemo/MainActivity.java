@@ -3,6 +3,7 @@ package com.tutuur.navigatordemo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 
 import com.tutuur.navigator.BundleExtra;
 import com.tutuur.navigatordemo.model.User;
@@ -55,8 +56,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void navigateTo(View view) {
-        Navigator.navigateToSecondActivity()
-                .username("David")
-                .startActivity(this);
+        switch (view.getId()) {
+            case R.id.intent_nav:
+                Navigator.navigateToSecondActivity()
+                        .username("David")
+                        .startActivity(this);
+            case R.id.intent_scheme:
+            case R.id.intent_http:
+                if (view instanceof Button) {
+                    Navigator.navigateTo(this, ((Button) view).getText().toString());
+                }
+                break;
+        }
     }
 }

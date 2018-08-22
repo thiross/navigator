@@ -24,6 +24,9 @@
         <activity
             android:name=".ThirdActivity"
             android:label="Third" />
+        <activity
+            android:name=".LoginActivity"
+            android:label="Login" />
     </application>
 
 </manifest>
