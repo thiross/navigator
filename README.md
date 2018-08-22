@@ -6,7 +6,7 @@ Navigator is a android navigation library, a simplified version of [Dart](https:
 
 ### Guide
 #### `@Navigation`
-Annotate a Activity with: `@Navigation` 
+Annotate a `Activity` with: `@Navigation` 
 ``` Java
 @Navigation
 public class SecondActivity extends AppCompatActivity {
