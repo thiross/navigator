@@ -114,7 +114,7 @@ When navigating by scheme:
 Navigator.navigateTo(context, "example://third?query=abc");
 ```
 
-Rules to extract argument from `url` is:
+Rules to extract argument from `url`:
 1. Every field annotated by `@BundleExtra` is mapped to a `key`
 2. Default `key` is field name，e.g：key of `String username` is `"username"`，alternatively you can set a `key` by the `value` field of `@BundleExtra`. e.g. `@BundleExtra("n")` has a `key`: `"n"`
 3. Any segment in scheme path start with `':'` and all query strings are put into a `(key, value)` map. The compiler try to extract all `value`s to related `key`s.
