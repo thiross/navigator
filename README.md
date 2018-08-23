@@ -110,7 +110,7 @@ public class ThirdActivity extends AppCompatActivity {
     ...
 }
 ```
-Warning：The scheme should contains **NO** query string(e.g. ?query=abc)
+Warning：The scheme must *NOT* contain query string(e.g. ?query=abc)
 
 When navigating by scheme:
 ``` Java
