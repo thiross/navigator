@@ -74,6 +74,7 @@ import com.tutuur.navigator.Navigation;
         "example://third9/:name",
         "example://third10/:name",
         "example://third11/:name",
+        "example://third/:name",
         "http://www.example.com/third"
 })
 public class ThirdActivity extends AppCompatActivity {

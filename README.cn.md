@@ -119,9 +119,8 @@ Navigator.navigateTo(context, "example://third?query=abc");
 ### 下载
 ```
 repositories {
-    // 正在迁移到Jcenter
     maven {
-        url 'https://dl.bintray.com/thiross/mvn/'
+        jcenter()
     }
 }
 dependencies {

@@ -1,4 +1,7 @@
 ## Navigator annotation processor.
+### Language
+[中文](./README.cn.md)
+
 ### Introduction
 Navigator is a android navigation library, a simplified version of [Dart](https://github.com/f2prateek/dart), with some new features: 
 1. Navigation interceptor.
@@ -122,9 +125,8 @@ Rules to extract argument from `url`:
 ### Download
 ```
 repositories {
-    // Jcenter migration is applied.
     maven {
-        url 'https://dl.bintray.com/thiross/mvn/'
+        jcenter()
     }
 }
 dependencies {
