@@ -1,18 +1,13 @@
 apply plugin: 'java-library'
 
-ext {
-    bintrayName = "compiler-util"
-    artifact = "compiler-util"
-}
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    compileOnly 'com.google.android:android:4.1.1.4'
-    compileOnly 'com.squareup:javapoet:1.11.1'
+    compileOnly deps.android.runtime
+    compileOnly deps.javapoet
 }
-
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
 
 apply from: '../upload-maven.gradle'

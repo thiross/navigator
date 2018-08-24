@@ -42,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
     @BundleExtra
     List<String> tags;
 
+    @BundleExtra
+    String nice;
+
     /*
     static class Inner {
         @BundleExtra

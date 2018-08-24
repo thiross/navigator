@@ -18,9 +18,9 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
 
-            groupId 'com.tutuur.android'
-            artifactId artifact
-            version '0.9.3'
+            groupId GROUP
+            artifactId project.name
+            version VERSION_NAME
         }
     }
 }
@@ -35,17 +35,17 @@ bintray {
     publications = ['maven']
 
     pkg {
-        repo = "mvn"
-        name = bintrayName
-        vcsUrl = "https://github.com/thiross/navigator.git"
-        websiteUrl = "https://github.com/thiross/navigator"
+        repo = VERSION_NAME.endsWith("SNAPSHOT") ? "snapshot" : "mvn"
+        name = project.name
+        vcsUrl = PROJECT_SCM
+        websiteUrl = PROJECT_URL
         publish = true
         publicDownloadNumbers = true
         licenses = ['Apache-2.0']
 
         version {
-            name = "0.9.3"
-            desc = "Beta version."
+            name = VERSION_NAME
+            desc = PROJECT_DESCRIPTION
             released = new Date()
         }
     }

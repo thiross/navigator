@@ -1,11 +1,32 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
+
+    // version variables
+    ext.versions = [
+            minSdk        : 14,
+            compileSdk    : 27,
+            supportLibrary: '27.0.2'
+    ]
+
+    ext.deps = [
+            android : [
+                    runtime: 'com.google.android:android:4.1.1.4'
+            ],
+            support : [
+                    annotations: "com.android.support:support-annotation:${versions.supportLibrary}"
+            ],
+            auto    : [
+                    service: 'com.google.auto.service:auto-service:1.0-rc4'
+            ],
+            guava   : 'com.google.guava:guava:24.0-jre',
+            javapoet: 'com.squareup:javapoet:1.11.1',
+    ]
 
     repositories {
         google()
         jcenter()
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.4'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.2'
@@ -14,7 +35,11 @@ buildscript {
     }
 }
 
-allprojects {
+subprojects { project ->
+
+    group = GROUP
+    version = VERSION_NAME
+
     repositories {
         google()
         jcenter()

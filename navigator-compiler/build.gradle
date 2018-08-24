@@ -1,10 +1,7 @@
 apply plugin: 'java-library'
 
-
-ext {
-    bintrayName = "navigator-compiler"
-    artifact = "navigator-compiler"
-}
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -12,13 +9,12 @@ dependencies {
     api 'com.tutuur.android:compiler-util:0.9.3'
     implementation 'com.tutuur.android:navigator-annotation:0.9.3'
 
-    api 'com.squareup:javapoet:1.11.1'
-    implementation 'com.google.android:android:4.1.1.4'
-    implementation 'com.google.auto.service:auto-service:1.0-rc4'
-}
+    compileOnly deps.android.runtime
+    compileOnly deps.auto.service
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+    api deps.javapoet
+    implementation deps.guava
+}
 
 apply from: '../upload-maven.gradle'
 
