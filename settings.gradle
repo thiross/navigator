@@ -1,1 +1,1 @@
-include ':app', ':compiler-util', ':navigator-annotation', ':navigator-compiler'
+include ':compiler-util', ':navigator-annotation', ':navigator-compiler', ':navigator-integration-test'

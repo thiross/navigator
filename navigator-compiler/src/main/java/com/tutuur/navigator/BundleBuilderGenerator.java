@@ -265,10 +265,15 @@ class BundleBuilderGenerator {
     }
 
     private void brewStartActivityMethod(TypeSpec.Builder builder, String clazz) {
+        final TypeMirror contextType = helper.ofType(clazz);
+        if (contextType == null) {
+            // support library not included.
+            return;
+        }
         final MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("startActivity")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.VOID)
-                .addParameter(TypeName.get(helper.ofType(clazz)), "context")
+                .addParameter(TypeName.get(contextType), "context")
                 .addParameter(TypeName.INT, "requestCode");
         if (!interceptors.isEmpty()) {
             brewLocalInterceptors(methodBuilder);

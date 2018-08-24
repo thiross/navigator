@@ -5,21 +5,24 @@ buildscript {
     ext.versions = [
             minSdk        : 14,
             compileSdk    : 27,
-            supportLibrary: '27.0.2'
+            supportLibrary: '27.0.2',
     ]
 
     ext.deps = [
-            android : [
+            android    : [
                     runtime: 'com.google.android:android:4.1.1.4'
             ],
-            support : [
+            support    : [
                     annotations: "com.android.support:support-annotation:${versions.supportLibrary}"
             ],
-            auto    : [
+            auto       : [
                     service: 'com.google.auto.service:auto-service:1.0-rc4'
             ],
-            guava   : 'com.google.guava:guava:24.0-jre',
-            javapoet: 'com.squareup:javapoet:1.11.1',
+            guava      : 'com.google.guava:guava:24.0-jre',
+            javapoet   : 'com.squareup:javapoet:1.11.1',
+            junit      : 'junit:junit:4.12',
+            truth      : 'com.google.truth:truth:0.42',
+            robolectric: 'org.robolectric:robolectric:3.7.1',
     ]
 
     repositories {
