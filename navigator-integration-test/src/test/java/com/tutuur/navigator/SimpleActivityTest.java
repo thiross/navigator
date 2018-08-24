@@ -3,7 +3,6 @@ package com.tutuur.navigator;
 import android.content.Intent;
 
 import com.google.common.collect.Lists;
-import com.google.common.truth.Correspondence;
 import com.tutuur.navigator.model.Cat;
 
 import org.junit.Test;
