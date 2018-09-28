@@ -6,8 +6,11 @@ targetCompatibility = JavaVersion.VERSION_1_7
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    api 'com.tutuur.android:compiler-util:0.9.3'
-    implementation 'com.tutuur.android:navigator-annotation:0.9.3'
+    // api 'com.tutuur.android:compiler-util:0.9.3'
+    // implementation 'com.tutuur.android:navigator-annotation:0.9.3'
+
+    api project(':compiler-util')
+    implementation project(':navigator-annotation')
 
     compileOnly deps.android.runtime
     compileOnly deps.auto.service

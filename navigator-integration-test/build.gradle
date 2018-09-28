@@ -12,6 +12,7 @@ android {
         applicationId "com.tutuur.navigator"
         minSdkVersion versions.minSdk
         targetSdkVersion versions.compileSdk
+        buildToolsVersion versions.buildTools
         versionCode 1
         versionName "1.0"
 
