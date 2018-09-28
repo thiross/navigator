@@ -1,1 +1,6 @@
-include ':compiler-util', ':navigator-annotation', ':navigator-compiler', ':navigator-integration-test'
+rootProject.name = "tutuur-navigator"
+include ':compiler-util',
+        ':navigator-annotation',
+        ':navigator',
+        ':navigator-compiler',
+        ':navigator-integration-test'

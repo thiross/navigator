@@ -1,0 +1,13 @@
+apply plugin: 'java-library'
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation deps.android.runtime
+
+    api project(':navigator-annotation')
+}
+
+apply from: "../upload-maven.gradle"
