@@ -1,6 +1,6 @@
 package com.tutuur.compiler.types
 
-object Fqdn {
+internal object Fqdn {
     /**
      * [String] Fqdn.
      */
