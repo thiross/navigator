@@ -1,6 +1,5 @@
 package com.tutuur.navigator;
 
-import android.app.Activity;
 import android.os.Bundle;
 
 import com.tutuur.navigator.model.Cat;
@@ -8,7 +7,7 @@ import com.tutuur.navigator.model.Cat;
 import java.util.List;
 
 @Navigation
-public class SecondActivity extends Activity {
+public class SecondActivity extends CommonActivity {
 
     @BundleExtra
     byte byteValue;
@@ -36,6 +35,9 @@ public class SecondActivity extends Activity {
 
     @BundleExtra
     List<String> stringList;
+
+    @SuppressWarnings("unused")
+    int ignore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -66,10 +66,16 @@ public class NavigationProcessor extends AbstractProcessor {
             final JavaFile file = new BundleBuilderGenerator(helper, clazz, members)
                     .brewJava();
             createFile(file);
+            testNewGenerator(clazz);
         }
         createFile(new NavigatorGenerator(helper, packageName, navigation)
                 .brewJava());
         return false;
+    }
+
+    private void testNewGenerator(TypeElement clazz) {
+        createFile(new com.tutuur.navigator.generators.BundleBuilderGenerator(clazz, helper.getEnv())
+        .brewJava());
     }
 
     private List<VariableElement> getAllMembers(TypeElement clazz, Map<TypeElement, List<VariableElement>> clazzMap) {

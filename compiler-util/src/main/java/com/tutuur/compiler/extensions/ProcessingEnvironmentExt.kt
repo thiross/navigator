@@ -20,46 +20,80 @@ val ProcessingEnvironment.types: Types
     get() = typeUtils
 
 /**
- * print info [message] to output.
+ * print [tag] and [message] at level [kind].
  */
-fun ProcessingEnvironment.i(message: String) {
-    messager.printMessage(Diagnostic.Kind.NOTE, message)
+private fun ProcessingEnvironment.print(kind: Diagnostic.Kind, tag: String, message: String) {
+    messager.printMessage(kind, "[$tag] $message")
 }
 
 /**
- * print warning [message] to output.
+ * print info [tag] and [message] to output.
  */
-fun ProcessingEnvironment.w(message: String) {
-    messager.printMessage(Diagnostic.Kind.WARNING, message)
+fun ProcessingEnvironment.i(tag: String, message: String) {
+    print(Diagnostic.Kind.NOTE, tag, message)
 }
 
 /**
- * print error [message] to output, and abort execution.
+ * print warning [tag] and [message] to output.
  */
-fun ProcessingEnvironment.e(message: String) {
-    messager.printMessage(Diagnostic.Kind.ERROR, message)
-    System.exit(1)
+fun ProcessingEnvironment.w(tag: String, message: String) {
+    print(Diagnostic.Kind.WARNING, tag, message)
 }
 
 /**
- * @return [true] if [element] is [String]
+ * print error [tag] and [message] to output.
+ */
+fun ProcessingEnvironment.e(tag: String, message: String) {
+    print(Diagnostic.Kind.ERROR, tag, message)
+}
+
+/**
+ * @return {@code true} if [element] is [String]
  */
 fun ProcessingEnvironment.isString(element: TypeElement): Boolean {
     return types.isSameType(element.asType(), elements.mirrorOf(Fqdn.STRING))
 }
 
 /**
- * @return [true] if [element] is Android `Activity`
+ * @return {@code true} if [element] is exactly Activity class.
  */
 fun ProcessingEnvironment.isActivity(element: TypeElement): Boolean {
+    return types.isSameType(element.asType(), elements.mirrorOf(Fqdn.ACTIVITY))
+}
+
+/**
+ * @return {@code true} if [element] is exactly Fragment class.
+ */
+fun ProcessingEnvironment.isFragment(element: TypeElement): Boolean {
+    val type = element.asType()
+    return types.isSameType(type, elements.mirrorOf(Fqdn.FRAGMENT)) || run {
+        val fragmentElement = elements.getTypeElement(Fqdn.SUPPORT_FRAGMENT)
+        if (fragmentElement == null) {
+            false
+        } else {
+            types.isSameType(type, fragmentElement.asType())
+        }
+    }
+}
+
+/**
+ * @return {@code true} if [element] is derived from Android `Activity`
+ */
+fun ProcessingEnvironment.isDerivedFromActivity(element: TypeElement): Boolean {
     return types.isAssignable(element.asType(), elements.mirrorOf(Fqdn.ACTIVITY))
 }
 
 /**
- * @return [true] if [element] is Android `Fragment`
+ * @return {@code true} if [element] is derived from Android `Fragment`
  */
-fun ProcessingEnvironment.isFragment(element: TypeElement): Boolean {
+fun ProcessingEnvironment.isDerivedFromFragment(element: TypeElement): Boolean {
     val type = element.asType()
-    return types.isAssignable(type, elements.mirrorOf(Fqdn.FRAGMENT)) ||
-            types.isAssignable(type, elements.mirrorOf(Fqdn.SUPPORT_FRAGMENT))
+    return types.isAssignable(type, elements.mirrorOf(Fqdn.FRAGMENT)) || run {
+        val fragmentElement = elements.getTypeElement(Fqdn.SUPPORT_FRAGMENT)
+        if (fragmentElement == null) {
+            false
+        } else {
+            types.isAssignable(type, fragmentElement.asType())
+        }
+    }
 }

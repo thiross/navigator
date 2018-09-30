@@ -10,6 +10,7 @@ android {
 
     defaultConfig {
         applicationId "com.tutuur.navigator"
+        compileSdkVersion versions.compileSdk
         minSdkVersion versions.minSdk
         targetSdkVersion versions.compileSdk
         buildToolsVersion versions.buildTools
@@ -37,6 +38,8 @@ android {
 dependencies {
     implementation project(':navigator-annotation')
     annotationProcessor project(':navigator-compiler')
+
+    implementation project(':navigator-integration-library')
     implementation deps.guava
 
     testImplementation deps.junit

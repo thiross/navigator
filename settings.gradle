@@ -3,4 +3,5 @@ include ':compiler-util',
         ':navigator-annotation',
         ':navigator',
         ':navigator-compiler',
+        ':navigator-integration-library',
         ':navigator-integration-test'
