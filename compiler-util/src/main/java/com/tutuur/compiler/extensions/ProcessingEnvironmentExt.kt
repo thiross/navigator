@@ -3,6 +3,8 @@ package com.tutuur.compiler.extensions
 import com.tutuur.compiler.types.Fqdn
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
+import javax.lang.model.element.VariableElement
+import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 import javax.tools.Diagnostic
@@ -48,24 +50,23 @@ fun ProcessingEnvironment.e(tag: String, message: String) {
 }
 
 /**
- * @return {@code true} if [element] is [String]
+ * @return {@code true} if [type] is [String]
  */
-fun ProcessingEnvironment.isString(element: TypeElement): Boolean {
-    return types.isSameType(element.asType(), elements.mirrorOf(Fqdn.STRING))
+fun ProcessingEnvironment.isString(type: TypeMirror): Boolean {
+    return types.isSameType(type, elements.mirrorOf(Fqdn.STRING))
 }
 
 /**
- * @return {@code true} if [element] is exactly Activity class.
+ * @return {@code true} if [type] is exactly Activity class.
  */
-fun ProcessingEnvironment.isActivity(element: TypeElement): Boolean {
-    return types.isSameType(element.asType(), elements.mirrorOf(Fqdn.ACTIVITY))
+fun ProcessingEnvironment.isActivity(type: TypeMirror): Boolean {
+    return types.isSameType(type, elements.mirrorOf(Fqdn.ACTIVITY))
 }
 
 /**
- * @return {@code true} if [element] is exactly Fragment class.
+ * @return {@code true} if [type] is exactly Fragment class.
  */
-fun ProcessingEnvironment.isFragment(element: TypeElement): Boolean {
-    val type = element.asType()
+fun ProcessingEnvironment.isFragment(type: TypeMirror): Boolean {
     return types.isSameType(type, elements.mirrorOf(Fqdn.FRAGMENT)) || run {
         val fragmentElement = elements.getTypeElement(Fqdn.SUPPORT_FRAGMENT)
         if (fragmentElement == null) {
@@ -77,17 +78,30 @@ fun ProcessingEnvironment.isFragment(element: TypeElement): Boolean {
 }
 
 /**
- * @return {@code true} if [element] is derived from Android `Activity`
+ * @return {@code true} if [type] derives from [Serializable]
  */
-fun ProcessingEnvironment.isDerivedFromActivity(element: TypeElement): Boolean {
-    return types.isAssignable(element.asType(), elements.mirrorOf(Fqdn.ACTIVITY))
+fun ProcessingEnvironment.isDerivedFromSerializable(type: TypeMirror): Boolean {
+    return types.isAssignable(type, elements.mirrorOf(Fqdn.SERIALIZABLE))
 }
 
 /**
- * @return {@code true} if [element] is derived from Android `Fragment`
+ * @return {@code true} if [type] derives from `Parcelable`
  */
-fun ProcessingEnvironment.isDerivedFromFragment(element: TypeElement): Boolean {
-    val type = element.asType()
+fun ProcessingEnvironment.isDerivedFromParcelable(type: TypeMirror): Boolean {
+    return types.isAssignable(type, elements.mirrorOf(Fqdn.PARCELABLE))
+}
+
+/**
+ * @return {@code true} if [type] derives from Android `Activity`
+ */
+fun ProcessingEnvironment.isDerivedFromActivity(type: TypeMirror): Boolean {
+    return types.isAssignable(type, elements.mirrorOf(Fqdn.ACTIVITY))
+}
+
+/**
+ * @return {@code true} if [type] derives from Android `Fragment`
+ */
+fun ProcessingEnvironment.isDerivedFromFragment(type: TypeMirror): Boolean {
     return types.isAssignable(type, elements.mirrorOf(Fqdn.FRAGMENT)) || run {
         val fragmentElement = elements.getTypeElement(Fqdn.SUPPORT_FRAGMENT)
         if (fragmentElement == null) {

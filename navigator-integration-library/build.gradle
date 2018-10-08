@@ -35,7 +35,7 @@ android {
 }
 
 dependencies {
-    implementation project(':navigator-annotation')
+    implementation project(':navigator')
     testImplementation deps.junit
     testImplementation deps.truth
 }
