@@ -1,5 +1,7 @@
 package com.tutuur.navigator.generators
 
+import android.content.Intent
+import android.os.Bundle
 import com.squareup.javapoet.*
 import com.tutuur.compiler.extensions.*
 import com.tutuur.navigator.BundleBuilder
@@ -9,7 +11,6 @@ import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.DeclaredType
-import javax.lang.model.type.TypeMirror
 
 /**
  * A helper class to generate bundle builder class of [target] class.
@@ -68,9 +69,18 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
     }
 
     /**
-     * @return true if [element] can put with a simple {@code put} method.
+     * @return {@code true} if [element] can get with a simple {@code get*Extra} method.
      */
-    private fun isSimpleType(element: VariableElement): Boolean {
+    private fun isSimpleGetType(element: VariableElement): Boolean {
+        val type = element.asType()
+        return TypeName.get(type).isPrimitive ||
+                env.isString(type)
+    }
+
+    /**
+     * @return {@code true} if [element] can put with a simple {@code put} method.
+     */
+    private fun isSimplePutType(element: VariableElement): Boolean {
         val type = element.asType()
         return TypeName.get(type).isPrimitive ||
                 env.isString(type) ||
@@ -79,8 +89,7 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
     }
 
     /**
-     * @return [TypeSpec] of bundle builder.
-     * [fields] contain all fields of current class.
+     * @return [TypeSpec] of bundle builder. [fields] contain all fields of current class.
      * [parentFields] contain all derived fields.
      */
     private fun brewType(fields: List<Field>, parentFields: List<Field>): TypeSpec {
@@ -102,12 +111,55 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
                     .returns(targetType)
                     .addParameter(type, name)
                     .also {
-                        if (isSimpleType(element)) {
+                        if (isSimplePutType(element)) {
                             it.addStatement("put(\$S, this.\$N)", name, name)
                         }
                     }
                     .addStatement("return this")
                     .build())
+        }
+        if (fields.isNotEmpty()) {
+            // create bind method.
+            builder.addMethod(brewBindMethod(fields))
+        }
+        return builder.build()
+    }
+
+    /**
+     * @return [MethodSpec] for {@code bind} method.
+     */
+    private fun brewBindMethod(fields: List<Field>): MethodSpec {
+        val builder = MethodSpec.methodBuilder("bind")
+                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                .addParameter(ClassName.get(target), "target")
+                .returns(TypeName.VOID)
+        if (env.isDerivedFromActivity(target.asType())) {
+            builder
+                    .addStatement("\$T intent = target.getIntent()", Intent::class.java)
+                    .beginControlFlow("if (intent == null)")
+                    .addStatement("return")
+                    .endControlFlow()
+                    .addStatement("\$T bundle = intent.getExtras()", Bundle::class.java)
+        } else {
+            builder.addStatement("\$T bundle = target.getArguments()", Bundle::class.java)
+                    .beginControlFlow("if (bundle == null)")
+                    .addStatement("return")
+                    .endControlFlow()
+        }
+        fields.forEach { field ->
+            val name = field.element
+                    .simpleName
+                    .toString()
+            val type = field.element
+                    .className
+                    .capitalize()
+            builder.beginControlFlow("if (bundle.containsKey(\$S))", name)
+            if (isSimpleGetType(field.element)) {
+                builder.addStatement("target.\$N = bundle.get\$N(\$S)", name, type, name)
+            } else if (env.isDerivedFromParcelable(field.element.asType())) {
+                builder.addStatement("target.\$N = bundle.getParcelable(\$S)", name, name)
+            }
+            builder.endControlFlow()
         }
         return builder.build()
     }
