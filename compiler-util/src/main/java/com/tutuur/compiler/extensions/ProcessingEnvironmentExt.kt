@@ -4,6 +4,8 @@ import com.tutuur.compiler.types.Fqdn
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
+import javax.lang.model.type.ArrayType
+import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
@@ -110,4 +112,35 @@ fun ProcessingEnvironment.isDerivedFromFragment(type: TypeMirror): Boolean {
             types.isAssignable(type, fragmentElement.asType())
         }
     }
+}
+
+/**
+ * @return {@code true} if [type] is [Array] of [itemType].
+ */
+fun ProcessingEnvironment.isArrayOf(type: TypeMirror, itemType: TypeMirror): Boolean {
+    return types.isAssignable(type, types.getArrayType(itemType))
+}
+
+/**
+ * @return {@code true} if [type] is [Array] of primitives.
+ */
+fun ProcessingEnvironment.isPrimitiveArray(type: TypeMirror): Boolean {
+    if (type.kind != TypeKind.ARRAY) {
+        return false
+    }
+    return (type as ArrayType).componentType.kind.isPrimitive
+}
+
+/**
+ * @return {@code true} if [type] is [Array] of [String]
+ */
+fun ProcessingEnvironment.isStringArray(type: TypeMirror): Boolean {
+    return isArrayOf(type, elements.mirrorOf(Fqdn.STRING))
+}
+
+/**
+ * @return {@code true} if [type] is [Array] of `Parcelable`
+ */
+fun ProcessingEnvironment.isParcelableArray(type: TypeMirror): Boolean {
+    return isArrayOf(type, elements.mirrorOf(Fqdn.PARCELABLE))
 }

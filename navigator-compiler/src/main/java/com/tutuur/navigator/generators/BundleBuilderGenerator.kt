@@ -85,7 +85,10 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
         return TypeName.get(type).isPrimitive ||
                 env.isString(type) ||
                 env.isDerivedFromSerializable(type) ||
-                env.isDerivedFromParcelable(type)
+                env.isDerivedFromParcelable(type) ||
+                env.isPrimitiveArray(type) ||
+                env.isStringArray(type) ||
+                env.isParcelableArray(type);
     }
 
     /**
