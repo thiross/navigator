@@ -5,6 +5,7 @@ import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.ArrayType
+import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
@@ -143,4 +144,24 @@ fun ProcessingEnvironment.isStringArray(type: TypeMirror): Boolean {
  */
 fun ProcessingEnvironment.isParcelableArray(type: TypeMirror): Boolean {
     return isArrayOf(type, elements.mirrorOf(Fqdn.PARCELABLE))
+}
+
+fun ProcessingEnvironment.isParameterizedType(type: TypeMirror,
+                                              genericType: TypeMirror,
+                                              parameterType: TypeMirror): Boolean {
+    if (type !is DeclaredType) {
+        return false
+    }
+    if (!types.isAssignable(type, types.erasure(genericType))) {
+        return false
+    }
+    val parameterTypes = type.typeArguments
+    if (parameterTypes.size != 1) {
+        return false
+    }
+    return types.isAssignable(parameterType, parameterTypes[0])
+}
+
+fun ProcessingEnvironment.isStringList(type: TypeMirror): Boolean {
+    return isParameterizedType(type, elements.mirrorOf(Fqdn.LIST), elements.mirrorOf(Fqdn.STRING))
 }

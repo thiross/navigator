@@ -78,11 +78,10 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
     }
 
     /**
-     * @return {@code true} if [element] can put with a simple {@code put} method.
+     * @return {@code true} if [type] can put with a simple {@code put} method.
      */
-    private fun isSimplePutType(element: VariableElement): Boolean {
-        val type = element.asType()
-        return TypeName.get(type).isPrimitive ||
+    private fun isSimplePutType(type: TypeMirror): Boolean {
+        return type.kind.isPrimitive ||
                 env.isString(type) ||
                 env.isDerivedFromSerializable(type) ||
                 env.isDerivedFromParcelable(type) ||
@@ -114,8 +113,13 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
                     .returns(targetType)
                     .addParameter(type, name)
                     .also {
-                        if (isSimplePutType(element)) {
-                            it.addStatement("put(\$S, this.\$N)", name, name)
+                        when {
+                            isSimplePutType(element.asType()) ->
+                                it.addStatement("put(\$S, this.\$N)", name, name)
+                            env.isStringList(element.asType()) ->
+                                it.addStatement("putStringList(\$S, this.\$N)", name, name)
+                            else ->
+                                env.e(TAG, "${element.simpleName}: is not supported.")
                         }
                     }
                     .addStatement("return this")
@@ -160,8 +164,6 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
                 builder.addStatement("target.\$N = bundle.getParcelable(\$S)", name, name)
             } else if (env.isPrimitiveArray(type) || env.isStringArray(type)) {
                 builder.addStatement("target.\$N = bundle.get\$NArray(\$S)", name, clsName, name);
-            } else {
-                env.e(TAG, "$type is not supported.")
             }
             builder.endControlFlow()
         }

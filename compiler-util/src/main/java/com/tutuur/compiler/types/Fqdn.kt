@@ -14,7 +14,7 @@ internal object Fqdn {
     /**
      * [List] Fqdn.
      */
-    const val LIST = "java.util.List";
+    const val LIST = "java.util.List"
 
     /**
      * Android `Parcelabel` Fqdn.
