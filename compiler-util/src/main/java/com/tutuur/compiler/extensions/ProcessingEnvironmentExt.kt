@@ -162,7 +162,7 @@ private fun ProcessingEnvironment.isParameterizedType(type: TypeMirror,
     if (parameterTypes.size != 1) {
         return false
     }
-    return types.isAssignable(parameterType, parameterTypes[0])
+    return types.isAssignable(parameterTypes[0], parameterType)
 }
 
 /**

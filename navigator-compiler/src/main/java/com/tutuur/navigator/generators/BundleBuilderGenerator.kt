@@ -124,7 +124,7 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
                             env.isParcelableList(type) ->
                                 it.addStatement("putParcelableList(\$S, this.\$N)", name, name)
                             else ->
-                                env.e(TAG, "${element.simpleName}: is not supported.")
+                                env.e(TAG, "${target.asType()}: ${element.simpleName}(${element.asType()}) not supported.")
                         }
                     }
                     .addStatement("return this")
@@ -173,6 +173,10 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
                 env.isParcelableArray(type) ->
                     builder.addStatement("\$T[] pa = bundle.getParcelableArray(\$S)", Parcelable::class.java, name)
                             .addStatement("target.\$N = \$T.copyOf(pa, pa.length, \$T.class)", name, Arrays::class.java, TypeName.get(type))
+                env.isStringList(type) ->
+                    builder.addStatement("target.\$N = bundle.getStringArrayList(\$S)", name, name)
+                env.isParcelableList(type) ->
+                    builder.addStatement("target.\$N = bundle.getParcelableArrayList(\$S)", name, name)
             }
             builder.endControlFlow()
         }

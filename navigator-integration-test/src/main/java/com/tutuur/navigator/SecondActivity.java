@@ -6,7 +6,9 @@ import com.tutuur.navigator.model.Cat;
 
 import java.util.List;
 
-@Navigation
+@Navigation(schemes = {
+        "example://second/:id"
+})
 public class SecondActivity extends CommonActivity {
 
     @BundleExtra
@@ -35,6 +37,9 @@ public class SecondActivity extends CommonActivity {
 
     @BundleExtra
     Cat[] cats;
+
+    @BundleExtra
+    List<Cat> catList;
 
     @BundleExtra
     List<String> stringList;

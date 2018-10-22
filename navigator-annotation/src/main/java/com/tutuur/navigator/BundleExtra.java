@@ -11,4 +11,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 public @interface BundleExtra {
     String value() default "";
+    boolean autowired() default false;
 }
