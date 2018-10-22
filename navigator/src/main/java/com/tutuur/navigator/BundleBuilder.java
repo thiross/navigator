@@ -294,4 +294,25 @@ public class BundleBuilder {
         }
         return this;
     }
+
+    /**
+     * Put {@code List<? extends Parcelable>} value to bundle.
+     *
+     * @param name  extra name.
+     * @param value {@code List<? extends Parcelable>} value.
+     * @return {@code this} to chain calls.
+     */
+    @SuppressWarnings("unchecked")
+    public BundleBuilder putParcelableList(String name, List<? extends Parcelable> value) {
+        if (value != null) {
+            ArrayList<? extends Parcelable> list;
+            if (value instanceof ArrayList) {
+                list = (ArrayList<? extends Parcelable>) value;
+            } else {
+                list = new ArrayList<>(value);
+            }
+            bundle.putParcelableArrayList(name, list);
+        }
+        return this;
+    }
 }

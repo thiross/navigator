@@ -146,9 +146,12 @@ fun ProcessingEnvironment.isParcelableArray(type: TypeMirror): Boolean {
     return isArrayOf(type, elements.mirrorOf(Fqdn.PARCELABLE))
 }
 
-fun ProcessingEnvironment.isParameterizedType(type: TypeMirror,
-                                              genericType: TypeMirror,
-                                              parameterType: TypeMirror): Boolean {
+/**
+ * @return {@code true} if [type] is [genericType]<[parameterType]>.
+ */
+private fun ProcessingEnvironment.isParameterizedType(type: TypeMirror,
+                                                      genericType: TypeMirror,
+                                                      parameterType: TypeMirror): Boolean {
     if (type !is DeclaredType) {
         return false
     }
@@ -162,6 +165,18 @@ fun ProcessingEnvironment.isParameterizedType(type: TypeMirror,
     return types.isAssignable(parameterType, parameterTypes[0])
 }
 
+/**
+ * @return {@code true} if [type] is [List] of [String]
+ */
 fun ProcessingEnvironment.isStringList(type: TypeMirror): Boolean {
     return isParameterizedType(type, elements.mirrorOf(Fqdn.LIST), elements.mirrorOf(Fqdn.STRING))
+}
+
+/**
+ * @return {@code true} if [type] is [List] of `Parcelable`
+ */
+fun ProcessingEnvironment.isParcelableList(type: TypeMirror): Boolean {
+    return isParameterizedType(type,
+            elements.mirrorOf(Fqdn.LIST),
+            elements.mirrorOf(Fqdn.PARCELABLE))
 }

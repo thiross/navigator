@@ -103,21 +103,24 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
         val targetType = ClassName.get(packageName, classNameOf(target))
         (parentFields + fields).forEach { field ->
             val element = field.element
-            val type = TypeName.get(element.asType())
+            val type = element.asType()
+            val typeName = TypeName.get(type)
             val name = element.simpleName.toString()
             // add field declaration
-            builder.addField(FieldSpec.builder(type, name).build())
+            builder.addField(FieldSpec.builder(typeName, name).build())
 
             // add field setter.
             builder.addMethod(MethodSpec.methodBuilder(name)
                     .returns(targetType)
-                    .addParameter(type, name)
+                    .addParameter(typeName, name)
                     .also {
                         when {
-                            isSimplePutType(element.asType()) ->
+                            isSimplePutType(type) ->
                                 it.addStatement("put(\$S, this.\$N)", name, name)
-                            env.isStringList(element.asType()) ->
+                            env.isStringList(type) ->
                                 it.addStatement("putStringList(\$S, this.\$N)", name, name)
+                            env.isParcelableList(type) ->
+                                it.addStatement("putParcelableList(\$S, this.\$N)", name, name)
                             else ->
                                 env.e(TAG, "${element.simpleName}: is not supported.")
                         }
