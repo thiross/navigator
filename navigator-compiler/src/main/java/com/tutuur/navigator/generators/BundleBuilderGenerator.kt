@@ -11,6 +11,7 @@ import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.TypeMirror
 
 /**
  * A helper class to generate bundle builder class of [target] class.
@@ -69,11 +70,10 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
     }
 
     /**
-     * @return {@code true} if [element] can get with a simple {@code get*Extra} method.
+     * @return {@code true} if [type] can get with a simple {@code get*Extra} method.
      */
-    private fun isSimpleGetType(element: VariableElement): Boolean {
-        val type = element.asType()
-        return TypeName.get(type).isPrimitive ||
+    private fun isSimpleGetType(type: TypeMirror): Boolean {
+        return type.kind.isPrimitive ||
                 env.isString(type)
     }
 
@@ -150,17 +150,18 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
                     .endControlFlow()
         }
         fields.forEach { field ->
-            val name = field.element
-                    .simpleName
-                    .toString()
-            val type = field.element
-                    .className
-                    .capitalize()
+            val name = field.element.simpleName.toString()
+            val type = field.element.asType()
+            val clsName = field.element.rawClassName.capitalize()
             builder.beginControlFlow("if (bundle.containsKey(\$S))", name)
-            if (isSimpleGetType(field.element)) {
-                builder.addStatement("target.\$N = bundle.get\$N(\$S)", name, type, name)
-            } else if (env.isDerivedFromParcelable(field.element.asType())) {
+            if (isSimpleGetType(type)) {
+                builder.addStatement("target.\$N = bundle.get\$N(\$S)", name, clsName, name)
+            } else if (env.isDerivedFromParcelable(type)) {
                 builder.addStatement("target.\$N = bundle.getParcelable(\$S)", name, name)
+            } else if (env.isPrimitiveArray(type) || env.isStringArray(type)) {
+                builder.addStatement("target.\$N = bundle.get\$NArray(\$S)", name, clsName, name);
+            } else {
+                env.e(TAG, "$type is not supported.")
             }
             builder.endControlFlow()
         }

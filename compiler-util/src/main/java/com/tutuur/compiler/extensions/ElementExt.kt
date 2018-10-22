@@ -1,19 +1,21 @@
 package com.tutuur.compiler.extensions
 
 import javax.lang.model.element.VariableElement
+import javax.lang.model.type.ArrayType
 
 /**
- * @return qualified class name of [VariableElement].
+ * @return class name (not full qualified) of [VariableElement]. if [VariableElement] is a array,
+ * return element class name.
  */
-val VariableElement.qualifiedClassName: String
-    get() = this.asType().toString()
-
-/**
- * @return class name (not full qualified) of [VariableElement].
- */
-val VariableElement.className: String
+val VariableElement.rawClassName: String
     get() {
-        val name = qualifiedClassName
+        val type = asType()
+        val rawType = if (type is ArrayType) {
+            type.componentType
+        } else {
+            type
+        }
+        val name = rawType.toString()
         val index = name.lastIndexOf('.')
         return if (index >= 0) {
             name.substring(index + 1)
