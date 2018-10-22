@@ -2,10 +2,12 @@ package com.tutuur.navigator.generators
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import com.squareup.javapoet.*
 import com.tutuur.compiler.extensions.*
 import com.tutuur.navigator.BundleBuilder
 import com.tutuur.navigator.BundleExtra
+import java.util.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
@@ -87,7 +89,7 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
                 env.isDerivedFromParcelable(type) ||
                 env.isPrimitiveArray(type) ||
                 env.isStringArray(type) ||
-                env.isParcelableArray(type);
+                env.isParcelableArray(type)
     }
 
     /**
@@ -161,12 +163,16 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
             val type = field.element.asType()
             val clsName = field.element.rawClassName.capitalize()
             builder.beginControlFlow("if (bundle.containsKey(\$S))", name)
-            if (isSimpleGetType(type)) {
-                builder.addStatement("target.\$N = bundle.get\$N(\$S)", name, clsName, name)
-            } else if (env.isDerivedFromParcelable(type)) {
-                builder.addStatement("target.\$N = bundle.getParcelable(\$S)", name, name)
-            } else if (env.isPrimitiveArray(type) || env.isStringArray(type)) {
-                builder.addStatement("target.\$N = bundle.get\$NArray(\$S)", name, clsName, name);
+            when {
+                isSimpleGetType(type) ->
+                    builder.addStatement("target.\$N = bundle.get\$N(\$S)", name, clsName, name)
+                env.isDerivedFromParcelable(type) ->
+                    builder.addStatement("target.\$N = bundle.getParcelable(\$S)", name, name)
+                env.isPrimitiveArray(type) || env.isStringArray(type) ->
+                    builder.addStatement("target.\$N = bundle.get\$NArray(\$S)", name, clsName, name)
+                env.isParcelableArray(type) ->
+                    builder.addStatement("\$T[] pa = bundle.getParcelableArray(\$S)", Parcelable::class.java, name)
+                            .addStatement("target.\$N = \$T.copyOf(pa, pa.length, \$T.class)", name, Arrays::class.java, TypeName.get(type))
             }
             builder.endControlFlow()
         }

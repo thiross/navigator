@@ -34,6 +34,9 @@ public class SecondActivity extends CommonActivity {
     Cat cat;
 
     @BundleExtra
+    Cat[] cats;
+
+    @BundleExtra
     List<String> stringList;
 
     @SuppressWarnings("unused")

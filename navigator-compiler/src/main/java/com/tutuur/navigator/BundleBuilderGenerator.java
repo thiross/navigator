@@ -341,7 +341,7 @@ class BundleBuilderGenerator {
             } else if (helper.isParcelableArray(typeMirror)) {
                 final TypeMirror elementType = ((ArrayType) typeMirror).getComponentType();
                 methodBuilder.beginControlFlow("")
-                        .addStatement("Parcelable[] ps = intent.getParcelableArrayExtra($S)", key)
+                        .addStatement("$T[] ps = intent.getParcelableArrayExtra($S)", Parcelable.class, key)
                         .addStatement(String.format("target.%s = $T.copyOf(ps, ps.length, $T[].class)", name), Arrays.class, ClassName.get(elementType))
                         .endControlFlow();
                 continue;
