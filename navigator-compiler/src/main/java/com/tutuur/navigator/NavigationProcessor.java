@@ -3,6 +3,7 @@ package com.tutuur.navigator;
 import com.google.auto.service.AutoService;
 import com.google.common.collect.Lists;
 import com.squareup.javapoet.JavaFile;
+import com.tutuur.navigator.models.NavigationTarget;
 import com.tutuur.util.AnnotationProcessorHelper;
 
 import java.io.IOException;
@@ -74,7 +75,7 @@ public class NavigationProcessor extends AbstractProcessor {
     }
 
     private void testNewGenerator(TypeElement clazz) {
-        createFile(new com.tutuur.navigator.generators.BundleBuilderGenerator(clazz, helper.getEnv())
+        createFile(new com.tutuur.navigator.generators.BundleBuilderGenerator(new NavigationTarget(clazz), helper.getEnv())
         .brewJava());
     }
 

@@ -16,11 +16,15 @@ public class BundleBuilder {
     /**
      * The target bundle.
      */
-    protected Bundle bundle;
+    protected final Bundle bundle;
 
     public BundleBuilder() {
         // initialize target bundle.
         bundle = new Bundle();
+    }
+
+    public BundleBuilder(Bundle bundle) {
+        this.bundle = bundle;
     }
 
     /**

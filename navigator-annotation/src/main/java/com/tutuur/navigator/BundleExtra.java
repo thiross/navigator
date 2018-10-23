@@ -10,6 +10,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.FIELD})
 public @interface BundleExtra {
-    String value() default "";
+    String value() default "[undefined]";
+
+    String key() default "[undefined]";
+
     boolean autowired() default false;
 }

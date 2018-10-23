@@ -1,41 +1,46 @@
 package com.tutuur.navigator.generators
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import com.squareup.javapoet.*
+import com.sun.org.apache.xpath.internal.operations.Bool
 import com.tutuur.compiler.extensions.*
 import com.tutuur.navigator.BundleBuilder
 import com.tutuur.navigator.BundleExtra
+import com.tutuur.navigator.models.Field
+import com.tutuur.navigator.models.NavigationTarget
+import com.tutuur.navigator.models.NavigationTarget.Companion.PATTERN_ARRAY_NAME
 import java.util.*
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+import javax.annotation.Nullable
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 
 /**
  * A helper class to generate bundle builder class of [target] class.
  */
-class BundleBuilderGenerator(private val target: TypeElement, private val env: ProcessingEnvironment) {
-
-    /**
-     * package name of the [target] element.
-     */
-    private val packageName = env.elements.packageNameOf(target)
+class BundleBuilderGenerator(private val target: NavigationTarget, private val env: ProcessingEnvironment) {
 
     /**
      * @return [JavaFile] of bundle builder class.
      */
     fun brewJava(): JavaFile? {
-        val type = target.asType()
-        if (!env.isDerivedFromActivity(type) && !env.isDerivedFromFragment(type)) {
+        if (!env.isDerivedFromActivity(target.type) && !env.isDerivedFromFragment(target.type)) {
             env.e(TAG, "only activities or fragment supported.")
             return null
         }
-        env.i(TAG, "Generating bundle builder for `${target.simpleName}`")
-        return JavaFile.builder(packageName, brewType(fieldsOf(target), fieldsOfParents(target)))
+        env.i(TAG, "Generating bundle builder for `${target.builderName}`")
+        return JavaFile.builder(target.packageName, brewType(fieldsOf(target.element), fieldsOfParents(target.element)))
                 .addFileComment(FILE_COMMENT)
                 .build()
     }
@@ -98,43 +103,139 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
      */
     private fun brewType(fields: List<Field>, parentFields: List<Field>): TypeSpec {
         // create type builder.
-        val builder = TypeSpec.classBuilder(classNameOf(target))
+        val builder = TypeSpec.classBuilder(target.builderName)
                 .superclass(ClassName.get(BundleBuilder::class.java))
                 .addModifiers(Modifier.FINAL)
+                .addMethod(MethodSpec.constructorBuilder()
+                        .build())
+                .addMethod(MethodSpec.constructorBuilder()
+                        .addParameter(Bundle::class.java, "bundle")
+                        .addStatement("super(bundle)")
+                        .build())
+        // create static pattern field.
+        val allFields = parentFields + fields
+        if (target.schemes.isNotEmpty()) {
+            builder.addField(brewPatternField(target.schemes))
+        }
         // target bundle builder class.
-        val targetType = ClassName.get(packageName, classNameOf(target))
-        (parentFields + fields).forEach { field ->
-            val element = field.element
-            val type = element.asType()
-            val typeName = TypeName.get(type)
-            val name = element.simpleName.toString()
-            // add field declaration
-            builder.addField(FieldSpec.builder(typeName, name).build())
-
-            // add field setter.
+        allFields.forEach { field ->
+            val typeName = TypeName.get(field.type)
+            val name = field.name
+            // add field getter setter.
             builder.addMethod(MethodSpec.methodBuilder(name)
-                    .returns(targetType)
-                    .addParameter(typeName, name)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(typeName)
+                    .also {
+                        val type = field.type
+                        val component = field.component
+                        when {
+                            isSimpleGetType(type) ->
+                                it.addStatement("return bundle.get\$N(\$S)", component, name)
+                            env.isDerivedFromParcelable(type) ->
+                                it.addStatement("return bundle.getParcelable(\$S)", name)
+                            env.isPrimitiveArray(type) || env.isStringArray(type) ->
+                                it.addStatement("return bundle.get\$NArray(\$S)", component, name)
+                            env.isParcelableArray(type) ->
+                                it.addStatement("\$T[] pa = bundle.getParcelableArray(\$S)", Parcelable::class.java, name)
+                                        .addStatement("return \$T.copyOf(pa, pa.length, \$T.class)", Arrays::class.java, TypeName.get(type))
+                            env.isStringList(type) ->
+                                it.addStatement("return bundle.getStringArrayList(\$S)", name)
+                            env.isParcelableList(type) ->
+                                it.addStatement("return bundle.getParcelableArrayList(\$S)", name)
+                        }
+                    }
+                    .build())
+            builder.addMethod(MethodSpec.methodBuilder(name)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(target.builderName)
+                    .addParameter(typeName, "value")
                     .also {
                         when {
-                            isSimplePutType(type) ->
-                                it.addStatement("put(\$S, this.\$N)", name, name)
-                            env.isStringList(type) ->
-                                it.addStatement("putStringList(\$S, this.\$N)", name, name)
-                            env.isParcelableList(type) ->
-                                it.addStatement("putParcelableList(\$S, this.\$N)", name, name)
+                            isSimplePutType(field.type) ->
+                                it.addStatement("put(\$S, value)", name)
+                            env.isStringList(field.type) ->
+                                it.addStatement("putStringList(\$S, value)", name)
+                            env.isParcelableList(field.type) ->
+                                it.addStatement("putParcelableList(\$S, value)", name)
                             else ->
-                                env.e(TAG, "${target.asType()}: ${element.simpleName}(${element.asType()}) not supported.")
+                                env.e(TAG, "${target.type}: ${field.name}(${field.type}) not supported.")
                         }
                     }
                     .addStatement("return this")
                     .build())
         }
+        if (env.isDerivedFromActivity(target.type)) {
+            builder.addMethod(brewNewIntentMethod())
+        }
+        builder.addMethod(brewStartMethod(env.activityElement.asType(), false))
+        builder.addMethod(brewStartMethod(env.activityElement.asType(), true))
+        builder.addMethod(brewStartMethod(env.fragmentElement.asType(), true))
+        brewStartMethod(env.supportFragmentElement?.asType(), true)?.let {
+            builder.addMethod(it)
+        }
         if (fields.isNotEmpty()) {
             // create bind method.
             builder.addMethod(brewBindMethod(fields))
         }
+        if (target.schemes.isNotEmpty()) {
+            builder.addMethod(brewParseMethod(allFields))
+        }
         return builder.build()
+    }
+
+    /**
+     * create regex patterns for schemes.
+     */
+    private fun brewPatternField(schemes: List<String>): FieldSpec {
+        val code = schemes.joinToString(prefix = "{", postfix = "}") {
+            """Pattern.compile("${it.replace(Regex.fromLiteral("."), "\\\\\\\\.")
+                    .replace(Regex(":([^/]+)"), "(?<$1>[^/]+)")}")"""
+        }
+        return FieldSpec.builder(ArrayTypeName.get(Array<Pattern>::class.java), PATTERN_ARRAY_NAME)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .initializer(code)
+                .build()
+    }
+
+    /**
+     * `newIntent` method create a [Intent] from [target] type if [target] is a activity.
+     */
+    private fun brewNewIntentMethod(): MethodSpec {
+        return MethodSpec.methodBuilder("newIntent")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(Context::class.java, "context")
+                .returns(Intent::class.java)
+                .addStatement("\$T intent = new Intent(context, \$T.class)", Intent::class.java, TypeName.get(target.type))
+                .addStatement("intent.putExtras(bundle)")
+                .addStatement("return intent")
+                .build()
+    }
+
+    private fun brewStartMethod(parameterType: TypeMirror?, hasRequestCode: Boolean): MethodSpec? {
+        if (parameterType == null) {
+            return null
+        }
+        val method = if (hasRequestCode) "startActivityForResult" else "startActivity"
+        return MethodSpec.methodBuilder(method)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(TypeName.get(parameterType), "context")
+                .also {
+                    if (hasRequestCode) {
+                        it.addParameter(TypeName.INT, "requestCode")
+                    }
+                    when {
+                        env.isActivity(parameterType) ->
+                            it.addStatement("\$T intent = newIntent(context)", Intent::class.java)
+                        env.isFragment(parameterType) ->
+                            it.addStatement("\$T intent = newIntent(context.getContext())", Intent::class.java)
+                    }
+                    if (hasRequestCode) {
+                        it.addStatement("context.$method(intent, requestCode)")
+                    } else {
+                        it.addStatement("context.$method(intent)")
+                    }
+                }
+                .build()
     }
 
     /**
@@ -143,9 +244,9 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
     private fun brewBindMethod(fields: List<Field>): MethodSpec {
         val builder = MethodSpec.methodBuilder("bind")
                 .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .addParameter(ClassName.get(target), "target")
+                .addParameter(ClassName.get(target.element), "target")
                 .returns(TypeName.VOID)
-        if (env.isDerivedFromActivity(target.asType())) {
+        if (env.isDerivedFromActivity(target.type)) {
             builder
                     .addStatement("\$T intent = target.getIntent()", Intent::class.java)
                     .beginControlFlow("if (intent == null)")
@@ -158,29 +259,81 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
                     .addStatement("return")
                     .endControlFlow()
         }
+        builder.addStatement("\$T b = new \$T(bundle)", target.builderName, target.builderName)
         fields.forEach { field ->
-            val name = field.element.simpleName.toString()
-            val type = field.element.asType()
-            val clsName = field.element.rawClassName.capitalize()
+            val name = field.name
             builder.beginControlFlow("if (bundle.containsKey(\$S))", name)
-            when {
-                isSimpleGetType(type) ->
-                    builder.addStatement("target.\$N = bundle.get\$N(\$S)", name, clsName, name)
-                env.isDerivedFromParcelable(type) ->
-                    builder.addStatement("target.\$N = bundle.getParcelable(\$S)", name, name)
-                env.isPrimitiveArray(type) || env.isStringArray(type) ->
-                    builder.addStatement("target.\$N = bundle.get\$NArray(\$S)", name, clsName, name)
-                env.isParcelableArray(type) ->
-                    builder.addStatement("\$T[] pa = bundle.getParcelableArray(\$S)", Parcelable::class.java, name)
-                            .addStatement("target.\$N = \$T.copyOf(pa, pa.length, \$T.class)", name, Arrays::class.java, TypeName.get(type))
-                env.isStringList(type) ->
-                    builder.addStatement("target.\$N = bundle.getStringArrayList(\$S)", name, name)
-                env.isParcelableList(type) ->
-                    builder.addStatement("target.\$N = bundle.getParcelableArrayList(\$S)", name, name)
-            }
-            builder.endControlFlow()
+                    .addStatement("target.\$N = b.\$N()", name, name)
+                    .endControlFlow()
         }
         return builder.build()
+    }
+
+    /**
+     * @return [MethodSpec] of `parse` method. This method compares all schemes to {@code scheme} parameter,
+     * and returns `_BundleBuilder` object when matches.
+     */
+    private fun brewParseMethod(fields: List<Field>): MethodSpec {
+        return MethodSpec.methodBuilder("parse")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Nullable::class.java)
+                .addParameter(String::class.java, "scheme")
+                .returns(target.builderName)
+                .addStatement("int index = scheme.indexOf(\"?\")")
+                .addStatement("String main = index >= 0 ? scheme.substring(0, index) : scheme")
+                .beginControlFlow("for (\$T p : $PATTERN_ARRAY_NAME)", Pattern::class.java)
+                .addStatement("\$T m = p.matcher(main)", Matcher::class.java)
+                .beginControlFlow("if (!m.find())")
+                .addStatement("continue")
+                .endControlFlow()
+                .addStatement("\$T b = new \$T()", target.builderName, target.builderName)
+                .also {
+                    it.addStatement("\$T uri = \$T.parse(scheme)", Uri::class.java, Uri::class.java)
+                    fields.filter { field ->
+                        (field.isPrimitive || env.isString(field.type)) &&
+                                (field.annotation.autowired || field.annotation.key != "[undefined]")
+                    }.forEach { field ->
+                        val annotation = field.annotation
+                        val key = if (annotation.key != "[undefined]") {
+                            annotation.key
+                        } else {
+                            field.name
+                        }
+                        it.beginControlFlow("")
+                                .addStatement("String s")
+                                .beginControlFlow("try")
+                                .addStatement("s = m.group(\$S)", key)
+                                .nextControlFlow("catch(\$T e)", IllegalArgumentException::class.java)
+                                .addStatement("s = uri.getQueryParameter(\$S)", key)
+                                .endControlFlow()
+                                .beginControlFlow("if (s != null)")
+                                .also { _ ->
+                                    if (field.isPrimitive) {
+                                        it.beginControlFlow("try")
+                                                .addStatement("""b.${'$'}N(${when (field.type.kind) {
+                                                    TypeKind.BOOLEAN -> "s.equalsIgnoreCase(\"true\") || s.equalsIgnoreCase(\"1\") || s.equalsIgnoreCase(\"t\")"
+                                                    TypeKind.BYTE -> "Byte.parseByte(s)"
+                                                    TypeKind.CHAR -> "s.charAt(0)"
+                                                    TypeKind.SHORT -> "Short.parseShort(s)"
+                                                    TypeKind.INT -> "Integer.parseInt(s)"
+                                                    TypeKind.LONG -> "Long.parseLong(s)"
+                                                    TypeKind.FLOAT -> "Float.parseFloat(s)"
+                                                    TypeKind.DOUBLE -> "Double.parseDouble(s)"
+                                                    else -> "undefined"
+                                                }})""", field.name)
+                                                .endControlFlow("catch(\$T e) {}", IllegalFormatException::class.java)
+                                    } else {
+                                        it.addStatement("b.\$N = s", field.name)
+                                    }
+                                }
+                                .endControlFlow()
+                                .endControlFlow()
+                    }
+                }
+                .addStatement("return b")
+                .endControlFlow()
+                .addStatement("return null")
+                .build()
     }
 
     companion object {
@@ -196,12 +349,5 @@ class BundleBuilderGenerator(private val target: TypeElement, private val env: P
         private val FILE_COMMENT = """
             Auto generated code by Navigator library, do *NOT* modify!!!
         """.trimIndent()
-
-        /**
-         * @return companion bundle builder class name of [element].
-         */
-        fun classNameOf(element: TypeElement) = "${element.simpleName}_BundleBuilder"
     }
 }
-
-data class Field(val element: VariableElement, val annotation: BundleExtra)

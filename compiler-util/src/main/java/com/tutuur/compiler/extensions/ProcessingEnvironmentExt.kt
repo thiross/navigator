@@ -3,7 +3,6 @@ package com.tutuur.compiler.extensions
 import com.tutuur.compiler.types.Fqdn
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
-import javax.lang.model.element.VariableElement
 import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
@@ -51,6 +50,25 @@ fun ProcessingEnvironment.w(tag: String, message: String) {
 fun ProcessingEnvironment.e(tag: String, message: String) {
     print(Diagnostic.Kind.ERROR, tag, message)
 }
+
+/**
+ * @return activity element from Fqdn.
+ */
+val ProcessingEnvironment.activityElement: TypeElement
+    get() = elements.elementOf(Fqdn.ACTIVITY)
+
+/**
+ * @return fragment element from Fqdn.
+ */
+val ProcessingEnvironment.fragmentElement: TypeElement
+    get() = elements.elementOf(Fqdn.FRAGMENT)
+
+/**
+ * create support fragment element from Fqdn.
+ * @return {@code null} if support library is not a dependency.
+ */
+val ProcessingEnvironment.supportFragmentElement: TypeElement?
+    get() = elements.getTypeElement(Fqdn.SUPPORT_FRAGMENT)
 
 /**
  * @return {@code true} if [type] is [String]
@@ -116,10 +134,10 @@ fun ProcessingEnvironment.isDerivedFromFragment(type: TypeMirror): Boolean {
 }
 
 /**
- * @return {@code true} if [type] is [Array] of [itemType].
+ * @return {@code true} if [type] is [Array] of [componentType].
  */
-fun ProcessingEnvironment.isArrayOf(type: TypeMirror, itemType: TypeMirror): Boolean {
-    return types.isAssignable(type, types.getArrayType(itemType))
+fun ProcessingEnvironment.isArrayOf(type: TypeMirror, componentType: TypeMirror): Boolean {
+    return types.isAssignable(type, types.getArrayType(componentType))
 }
 
 /**
@@ -147,11 +165,11 @@ fun ProcessingEnvironment.isParcelableArray(type: TypeMirror): Boolean {
 }
 
 /**
- * @return {@code true} if [type] is [genericType]<[parameterType]>.
+ * @return {@code true} if [type] is [genericType]<[componentType]>.
  */
 private fun ProcessingEnvironment.isParameterizedType(type: TypeMirror,
                                                       genericType: TypeMirror,
-                                                      parameterType: TypeMirror): Boolean {
+                                                      componentType: TypeMirror): Boolean {
     if (type !is DeclaredType) {
         return false
     }
@@ -162,7 +180,7 @@ private fun ProcessingEnvironment.isParameterizedType(type: TypeMirror,
     if (parameterTypes.size != 1) {
         return false
     }
-    return types.isAssignable(parameterTypes[0], parameterType)
+    return types.isAssignable(parameterTypes[0], componentType)
 }
 
 /**

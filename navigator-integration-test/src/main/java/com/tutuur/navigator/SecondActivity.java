@@ -7,9 +7,13 @@ import com.tutuur.navigator.model.Cat;
 import java.util.List;
 
 @Navigation(schemes = {
-        "example://second/:id"
+        "example://second/:id",
+        "http://www.example.com/second/:id"
 })
 public class SecondActivity extends CommonActivity {
+
+    @BundleExtra(key = "flag")
+    boolean boolValue;
 
     @BundleExtra
     byte byteValue;
@@ -20,10 +24,10 @@ public class SecondActivity extends CommonActivity {
     @BundleExtra
     short shortValue;
 
-    @BundleExtra
+    @BundleExtra(autowired = true)
     int intValue;
 
-    @BundleExtra
+    @BundleExtra(key = "float")
     float floatValue;
 
     @BundleExtra
