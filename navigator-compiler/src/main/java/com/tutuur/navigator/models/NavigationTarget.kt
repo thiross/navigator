@@ -28,7 +28,7 @@ data class NavigationTarget(val element: TypeElement) {
     /**
      * Bundle builder class name.
      */
-    val builderName: ClassName = ClassName.get(packageName, "${element.simpleName}_BundleBuilder")
+    val builderName: ClassName = ClassName.get(packageName, "${element.simpleName}_IntentBuilder")
 
     /**
      * [Navigation] annotation on [element]

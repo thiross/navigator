@@ -1,5 +1,7 @@
 package com.tutuur.navigator;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 
@@ -8,22 +10,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Bundle builder helper class. to create bundles.
+ * {@link Intent} builder helper class. to create bundles.
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
-public class BundleBuilder {
+public class IntentBuilder {
 
     /**
      * The target bundle.
      */
     protected final Bundle bundle;
 
-    public BundleBuilder() {
+    public IntentBuilder() {
         // initialize target bundle.
         bundle = new Bundle();
     }
 
-    public BundleBuilder(Bundle bundle) {
+    public IntentBuilder(Bundle bundle) {
         this.bundle = bundle;
     }
 
@@ -34,7 +36,7 @@ public class BundleBuilder {
      * @param value byte value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, byte value) {
+    public IntentBuilder put(String name, byte value) {
         if (value != 0) {
             bundle.putByte(name, value);
         }
@@ -48,7 +50,7 @@ public class BundleBuilder {
      * @param value char value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, char value) {
+    public IntentBuilder put(String name, char value) {
         if (value != 0) {
             bundle.putChar(name, value);
         }
@@ -62,7 +64,7 @@ public class BundleBuilder {
      * @param value short value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, short value) {
+    public IntentBuilder put(String name, short value) {
         if (value != 0) {
             bundle.putShort(name, value);
         }
@@ -76,7 +78,7 @@ public class BundleBuilder {
      * @param value int value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, int value) {
+    public IntentBuilder put(String name, int value) {
         if (value != 0) {
             bundle.putInt(name, value);
         }
@@ -90,7 +92,7 @@ public class BundleBuilder {
      * @param value float value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, float value) {
+    public IntentBuilder put(String name, float value) {
         if (value != 0.0f) {
             bundle.putFloat(name, value);
         }
@@ -104,7 +106,7 @@ public class BundleBuilder {
      * @param value double value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, double value) {
+    public IntentBuilder put(String name, double value) {
         if (value != 0.0) {
             bundle.putDouble(name, value);
         }
@@ -118,7 +120,7 @@ public class BundleBuilder {
      * @param value string value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, String value) {
+    public IntentBuilder put(String name, String value) {
         if (value != null) {
             bundle.putString(name, value);
         }
@@ -132,7 +134,7 @@ public class BundleBuilder {
      * @param value serializable value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, Serializable value) {
+    public IntentBuilder put(String name, Serializable value) {
         if (value != null) {
             bundle.putSerializable(name, value);
         }
@@ -146,7 +148,7 @@ public class BundleBuilder {
      * @param value parcelable value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, Parcelable value) {
+    public IntentBuilder put(String name, Parcelable value) {
         if (value != null) {
             bundle.putParcelable(name, value);
         }
@@ -160,7 +162,7 @@ public class BundleBuilder {
      * @param value {@code byte[]} value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, byte[] value) {
+    public IntentBuilder put(String name, byte[] value) {
         if (value != null) {
             bundle.putByteArray(name, value);
         }
@@ -174,7 +176,7 @@ public class BundleBuilder {
      * @param value {@code char[]} value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, char[] value) {
+    public IntentBuilder put(String name, char[] value) {
         if (value != null) {
             bundle.putCharArray(name, value);
         }
@@ -188,7 +190,7 @@ public class BundleBuilder {
      * @param value {@code short[]} value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, short[] value) {
+    public IntentBuilder put(String name, short[] value) {
         if (value != null) {
             bundle.putShortArray(name, value);
         }
@@ -202,7 +204,7 @@ public class BundleBuilder {
      * @param value {@code int[]} value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, int[] value) {
+    public IntentBuilder put(String name, int[] value) {
         if (value != null) {
             bundle.putIntArray(name, value);
         }
@@ -216,7 +218,7 @@ public class BundleBuilder {
      * @param value {@code long[]} value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, long[] value) {
+    public IntentBuilder put(String name, long[] value) {
         if (value != null) {
             bundle.putLongArray(name, value);
         }
@@ -230,7 +232,7 @@ public class BundleBuilder {
      * @param value {@code float[]} value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, float[] value) {
+    public IntentBuilder put(String name, float[] value) {
         if (value != null) {
             bundle.putFloatArray(name, value);
         }
@@ -244,7 +246,7 @@ public class BundleBuilder {
      * @param value {@code double[]} value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, double[] value) {
+    public IntentBuilder put(String name, double[] value) {
         if (value != null) {
             bundle.putDoubleArray(name, value);
         }
@@ -258,7 +260,7 @@ public class BundleBuilder {
      * @param value {@code String} array value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, String[] value) {
+    public IntentBuilder put(String name, String[] value) {
         if (value != null) {
             bundle.putStringArray(name, value);
         }
@@ -272,7 +274,7 @@ public class BundleBuilder {
      * @param value {@code Parcelable} array value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder put(String name, Parcelable[] value) {
+    public IntentBuilder put(String name, Parcelable[] value) {
         if (value != null) {
             bundle.putParcelableArray(name, value);
         }
@@ -286,7 +288,7 @@ public class BundleBuilder {
      * @param value {@code List<String>} value.
      * @return {@code this} to chain calls.
      */
-    public BundleBuilder putStringList(String name, List<String> value) {
+    public IntentBuilder putStringList(String name, List<String> value) {
         if (value != null) {
             ArrayList<String> list;
             if (value instanceof ArrayList) {
@@ -307,7 +309,7 @@ public class BundleBuilder {
      * @return {@code this} to chain calls.
      */
     @SuppressWarnings("unchecked")
-    public BundleBuilder putParcelableList(String name, List<? extends Parcelable> value) {
+    public IntentBuilder putParcelableList(String name, List<? extends Parcelable> value) {
         if (value != null) {
             ArrayList<? extends Parcelable> list;
             if (value instanceof ArrayList) {
@@ -318,5 +320,15 @@ public class BundleBuilder {
             bundle.putParcelableArrayList(name, list);
         }
         return this;
+    }
+
+    /**
+     * Create {@link Intent} from _IntentBuilder attributes.
+     *
+     * @param context need by {@link Intent} constructor.
+     * @return {@link Intent} related to navigation target.
+     */
+    public Intent build(Context context) {
+        throw new RuntimeException("IntentBuilder doesn't implement build method.");
     }
 }

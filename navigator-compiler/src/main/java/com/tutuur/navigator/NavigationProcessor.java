@@ -75,7 +75,7 @@ public class NavigationProcessor extends AbstractProcessor {
     }
 
     private void testNewGenerator(TypeElement clazz) {
-        createFile(new com.tutuur.navigator.generators.BundleBuilderGenerator(new NavigationTarget(clazz), helper.getEnv())
+        createFile(new com.tutuur.navigator.generators.IntentBuilderGenerator(new NavigationTarget(clazz), helper.getEnv())
         .brewJava());
     }
 

@@ -81,7 +81,7 @@ class BundleBuilderGenerator {
     }
 
     private TypeSpec brewType() {
-        helper.i(TAG, String.format("Generating BundleBuilder: %s.%s", targetPackageName, targetClassName));
+        helper.i(TAG, String.format("Generating IntentBuilder: %s.%s", targetPackageName, targetClassName));
         TypeSpec.Builder builder = TypeSpec.classBuilder(targetClassName)
                 .addModifiers(Modifier.PUBLIC);
         for (VariableElement member : members) {

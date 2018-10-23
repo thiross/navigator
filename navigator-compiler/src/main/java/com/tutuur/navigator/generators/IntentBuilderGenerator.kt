@@ -1,16 +1,14 @@
 package com.tutuur.navigator.generators
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import com.squareup.javapoet.*
-import com.sun.org.apache.xpath.internal.operations.Bool
 import com.tutuur.compiler.extensions.*
-import com.tutuur.navigator.BundleBuilder
 import com.tutuur.navigator.BundleExtra
+import com.tutuur.navigator.IntentBuilder
 import com.tutuur.navigator.models.Field
 import com.tutuur.navigator.models.NavigationTarget
 import com.tutuur.navigator.models.NavigationTarget.Companion.PATTERN_ARRAY_NAME
@@ -27,9 +25,9 @@ import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 
 /**
- * A helper class to generate bundle builder class of [target] class.
+ * A helper class to generate intent builder class of [target] class.
  */
-class BundleBuilderGenerator(private val target: NavigationTarget, private val env: ProcessingEnvironment) {
+class IntentBuilderGenerator(private val target: NavigationTarget, private val env: ProcessingEnvironment) {
 
     /**
      * @return [JavaFile] of bundle builder class.
@@ -104,7 +102,7 @@ class BundleBuilderGenerator(private val target: NavigationTarget, private val e
     private fun brewType(fields: List<Field>, parentFields: List<Field>): TypeSpec {
         // create type builder.
         val builder = TypeSpec.classBuilder(target.builderName)
-                .superclass(ClassName.get(BundleBuilder::class.java))
+                .superclass(ClassName.get(IntentBuilder::class.java))
                 .addModifiers(Modifier.FINAL)
                 .addMethod(MethodSpec.constructorBuilder()
                         .build())
@@ -165,13 +163,7 @@ class BundleBuilderGenerator(private val target: NavigationTarget, private val e
                     .build())
         }
         if (env.isDerivedFromActivity(target.type)) {
-            builder.addMethod(brewNewIntentMethod())
-        }
-        builder.addMethod(brewStartMethod(env.activityElement.asType(), false))
-        builder.addMethod(brewStartMethod(env.activityElement.asType(), true))
-        builder.addMethod(brewStartMethod(env.fragmentElement.asType(), true))
-        brewStartMethod(env.supportFragmentElement?.asType(), true)?.let {
-            builder.addMethod(it)
+            builder.addMethod(brewBuildMethod())
         }
         if (fields.isNotEmpty()) {
             // create bind method.
@@ -198,43 +190,17 @@ class BundleBuilderGenerator(private val target: NavigationTarget, private val e
     }
 
     /**
-     * `newIntent` method create a [Intent] from [target] type if [target] is a activity.
+     * `build` method create a [Intent] from [target] type if [target] is a activity.
      */
-    private fun brewNewIntentMethod(): MethodSpec {
-        return MethodSpec.methodBuilder("newIntent")
+    private fun brewBuildMethod(): MethodSpec {
+        return MethodSpec.methodBuilder("build")
+                .addAnnotation(Override::class.java)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(Context::class.java, "context")
                 .returns(Intent::class.java)
                 .addStatement("\$T intent = new Intent(context, \$T.class)", Intent::class.java, TypeName.get(target.type))
                 .addStatement("intent.putExtras(bundle)")
                 .addStatement("return intent")
-                .build()
-    }
-
-    private fun brewStartMethod(parameterType: TypeMirror?, hasRequestCode: Boolean): MethodSpec? {
-        if (parameterType == null) {
-            return null
-        }
-        val method = if (hasRequestCode) "startActivityForResult" else "startActivity"
-        return MethodSpec.methodBuilder(method)
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(TypeName.get(parameterType), "context")
-                .also {
-                    if (hasRequestCode) {
-                        it.addParameter(TypeName.INT, "requestCode")
-                    }
-                    when {
-                        env.isActivity(parameterType) ->
-                            it.addStatement("\$T intent = newIntent(context)", Intent::class.java)
-                        env.isFragment(parameterType) ->
-                            it.addStatement("\$T intent = newIntent(context.getContext())", Intent::class.java)
-                    }
-                    if (hasRequestCode) {
-                        it.addStatement("context.$method(intent, requestCode)")
-                    } else {
-                        it.addStatement("context.$method(intent)")
-                    }
-                }
                 .build()
     }
 
@@ -271,7 +237,7 @@ class BundleBuilderGenerator(private val target: NavigationTarget, private val e
 
     /**
      * @return [MethodSpec] of `parse` method. This method compares all schemes to {@code scheme} parameter,
-     * and returns `_BundleBuilder` object when matches.
+     * and returns `_IntentBuilder` object when matches.
      */
     private fun brewParseMethod(fields: List<Field>): MethodSpec {
         return MethodSpec.methodBuilder("parse")
@@ -340,11 +306,11 @@ class BundleBuilderGenerator(private val target: NavigationTarget, private val e
         /**
          * command line message tag.
          */
-        private val TAG = BundleBuilderGenerator::class.simpleName!!
+        private val TAG = IntentBuilderGenerator::class.simpleName!!
 
 
         /**
-         * File comment of *_BundleBuilder.
+         * File comment of *_IntentBuilder.
          */
         private val FILE_COMMENT = """
             Auto generated code by Navigator library, do *NOT* modify!!!
