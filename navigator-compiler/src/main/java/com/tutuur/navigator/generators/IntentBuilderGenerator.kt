@@ -9,13 +9,13 @@ import com.squareup.javapoet.*
 import com.tutuur.compiler.extensions.*
 import com.tutuur.navigator.BundleExtra
 import com.tutuur.navigator.Interceptor
+import com.tutuur.navigator.models.Comment.FILE_COMMENT
 import com.tutuur.navigator.models.Field
 import com.tutuur.navigator.models.NavigationTarget
 import com.tutuur.navigator.models.NavigationTarget.Companion.PATTERN_ARRAY_NAME
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import javax.annotation.Nullable
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
@@ -245,6 +245,9 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
         return builder.build()
     }
 
+    /**
+     * Create startActivity methods. all classes in [interceptors] list will be instantiated and called before navigating.
+     */
     private fun brewStartMethod(type: TypeMirror, interceptors: List<TypeMirror>, hasRequestCode: Boolean): MethodSpec {
         return MethodSpec.methodBuilder(if (hasRequestCode) "startActivityForResult" else "startActivity")
                 .addModifiers(Modifier.PUBLIC)
@@ -290,7 +293,7 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
     private fun brewParseMethod(fields: List<Field>): MethodSpec {
         return MethodSpec.methodBuilder("parse")
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Nullable::class.java)
+                .addAnnotation(ClassName.get("javax.annotation", "Nullable"))
                 .addParameter(String::class.java, "scheme")
                 .returns(target.builderName)
                 .addStatement("int index = scheme.indexOf(\"?\")")
@@ -355,13 +358,5 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
          * command line message tag.
          */
         private val TAG = IntentBuilderGenerator::class.simpleName!!
-
-
-        /**
-         * File comment of *_IntentBuilder.
-         */
-        private val FILE_COMMENT = """
-            Auto generated code by Navigator library, do *NOT* modify!!!
-        """.trimIndent()
     }
 }

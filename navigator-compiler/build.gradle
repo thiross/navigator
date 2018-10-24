@@ -30,7 +30,6 @@ dependencies {
 
     api deps.javapoet
     implementation deps.kotlin.reflect
-    implementation deps.guava
 }
 
 apply from: '../upload-maven.gradle'

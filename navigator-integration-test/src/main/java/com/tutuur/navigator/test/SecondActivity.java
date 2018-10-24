@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.tutuur.navigator.BundleExtra;
 import com.tutuur.navigator.Navigation;
+import com.tutuur.navigator.Navigator;
 import com.tutuur.navigator.library.CommonActivity;
 import com.tutuur.navigator.test.interceptors.LoginInterceptor;
 import com.tutuur.navigator.test.models.Cat;
@@ -50,6 +51,9 @@ public class SecondActivity extends CommonActivity {
 
     @BundleExtra
     Cat[] cats;
+
+    @BundleExtra
+    int abc;
 
     @BundleExtra
     List<Cat> catList;

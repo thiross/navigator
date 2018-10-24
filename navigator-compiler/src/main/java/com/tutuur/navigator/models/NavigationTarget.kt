@@ -65,4 +65,13 @@ data class NavigationTarget(val element: TypeElement) {
          */
         const val PATTERN_ARRAY_NAME = "PATTERNS"
     }
+
+    override fun equals(other: Any?) =
+            if (other is NavigationTarget) {
+                type.toString() == other.toString()
+            } else {
+                false
+            }
+
+    override fun hashCode() = type.toString().hashCode()
 }
