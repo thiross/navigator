@@ -17,13 +17,13 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import javax.annotation.Nullable
 import javax.annotation.processing.ProcessingEnvironment
-import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
+import kotlin.collections.ArrayList
 
 /**
  * A helper class to generate intent builder class of [target] class.
@@ -245,18 +245,41 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
         return builder.build()
     }
 
-    private fun brewStartMethod(type: TypeMirror, interceptors: List<AnnotationValue>, hasRequestCode: Boolean): MethodSpec {
-        val name = if (hasRequestCode) "startActivityForResult" else "startActivity"
-        return MethodSpec.methodBuilder(name)
+    private fun brewStartMethod(type: TypeMirror, interceptors: List<TypeMirror>, hasRequestCode: Boolean): MethodSpec {
+        return MethodSpec.methodBuilder(if (hasRequestCode) "startActivityForResult" else "startActivity")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override::class.java)
                 .addParameter(TypeName.get(type), "context")
+                .returns(TypeName.VOID)
                 .also {
                     if (hasRequestCode) {
                         it.addParameter(TypeName.INT, "requestCode")
                     }
+                    val context = if (env.isDerivedFromFragment(type)) "context.getActivity()" else "context"
+                    if (interceptors.isNotEmpty()) {
+                        it.addStatement("\$T<\$T> its = new \$T<>()", List::class.java, Interceptor::class.java, ArrayList::class.java)
+                        interceptors.forEach { type ->
+                            it.addStatement("its.add(new \$T())", TypeName.get(type))
+                        }
+                        it.beginControlFlow("for (\$T it : its)", Interceptor::class.java)
+                                .beginControlFlow("if (it.preIntercept($context))")
+                                .addStatement("return")
+                                .endControlFlow()
+                                .endControlFlow()
+                    }
+                    it.addStatement("\$T intent = build($context)", Intent::class.java)
+                    if (interceptors.isNotEmpty()) {
+                        it.beginControlFlow("for (\$T it : its)", Interceptor::class.java)
+                                .addStatement("if (it.intercept(intent))")
+                                .addStatement("return")
+                                .endControlFlow()
+                    }
+                    if (hasRequestCode) {
+                        it.addStatement("context.startActivityForResult(intent, requestCode)")
+                    } else {
+                        it.addStatement("context.startActivity(intent)")
+                    }
                 }
-                .returns(TypeName.VOID)
                 .build()
     }
 

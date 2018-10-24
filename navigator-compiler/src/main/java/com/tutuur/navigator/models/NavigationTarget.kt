@@ -54,7 +54,10 @@ data class NavigationTarget(val element: TypeElement) {
             }?.let {
                 @Suppress("UNCHECKED_CAST")
                 it.value.value as List<AnnotationValue>
-            } ?: listOf()
+            }?.map {
+                it.value as TypeMirror
+            }
+            ?: listOf()
 
     companion object {
         /**
