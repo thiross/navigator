@@ -1,5 +1,7 @@
 package com.tutuur.navigator;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -330,5 +332,94 @@ public class IntentBuilder {
      */
     public Intent build(Context context) {
         throw new RuntimeException("IntentBuilder doesn't implement build method.");
+    }
+
+    /**
+     * @see Interceptor
+     */
+    protected boolean preIntercept(Context context) {
+        return false;
+    }
+
+    /**
+     * @see Interceptor
+     */
+    protected boolean intercept(Intent intent) {
+        return false;
+    }
+
+    /**
+     * Start a target intent build by this builder.
+     *
+     * @param context the caller context.
+     * @return {@code true} on a successful navigation.
+     */
+    public boolean startActivity(Context context) {
+        if (preIntercept(context)) {
+            return false;
+        }
+        Intent intent = build(context);
+        if (intercept(intent)) {
+            return false;
+        }
+        context.startActivity(intent);
+        return true;
+    }
+
+    /**
+     * Start a target intent build by this builder for result.
+     *
+     * @param activity    the caller activity.
+     * @param requestCode to identify request.
+     * @return {@code true} on a successful navigation.
+     */
+    public boolean startActivityForResult(Activity activity, int requestCode) {
+        if (preIntercept(activity)) {
+            return false;
+        }
+        Intent intent = build(activity);
+        if (intercept(intent)) {
+            return false;
+        }
+        activity.startActivityForResult(intent, requestCode);
+        return true;
+    }
+
+    /**
+     * Start a target intent build by this builder for result.
+     *
+     * @param fragment    the caller fragment.
+     * @param requestCode to identify request.
+     * @return {@code true} on a successful navigation.
+     */
+    public boolean startActivityForResult(Fragment fragment, int requestCode) {
+        if (preIntercept(fragment.getActivity())) {
+            return false;
+        }
+        Intent intent = build(fragment.getActivity());
+        if (intercept(intent)) {
+            return false;
+        }
+        fragment.startActivityForResult(intent, requestCode);
+        return true;
+    }
+
+    /**
+     * Start a target intent build by this builder for result.
+     *
+     * @param fragment    the caller fragment.
+     * @param requestCode to identify request.
+     * @return {@code true} on a successful navigation.
+     */
+    public boolean startActivityForResult(android.support.v4.app.Fragment fragment, int requestCode) {
+        if (preIntercept(fragment.getActivity())) {
+            return false;
+        }
+        Intent intent = build(fragment.getActivity());
+        if (intercept(intent)) {
+            return false;
+        }
+        fragment.startActivityForResult(intent, requestCode);
+        return true;
     }
 }

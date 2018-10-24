@@ -39,4 +39,5 @@ dependencies {
     api project(':navigator-annotation')
 
     implementation deps.android.runtime
+    implementation deps.support.fragment
 }
