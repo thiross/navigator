@@ -23,7 +23,7 @@ dependencies {
     // implementation 'com.tutuur.android:navigator-annotation:0.9.3'
 
     api project(':compiler-util')
-    implementation project(':navigator')
+    implementation project(':navigator-annotation')
 
     compileOnly deps.android.runtime
     compileOnly deps.auto.service

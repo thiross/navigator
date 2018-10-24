@@ -1,4 +1,4 @@
-package com.tutuur.navigator.model;
+package com.tutuur.navigator.test.model;
 
 import android.annotation.SuppressLint;
 import android.os.Parcel;

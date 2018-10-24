@@ -1,4 +1,4 @@
-package com.tutuur.navigator;
+package com.tutuur.navigator.test;
 
 import android.app.Activity;
 import android.os.Bundle;

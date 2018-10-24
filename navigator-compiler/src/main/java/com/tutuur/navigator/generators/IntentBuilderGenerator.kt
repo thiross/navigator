@@ -8,7 +8,6 @@ import android.os.Parcelable
 import com.squareup.javapoet.*
 import com.tutuur.compiler.extensions.*
 import com.tutuur.navigator.BundleExtra
-import com.tutuur.navigator.IntentBuilder
 import com.tutuur.navigator.models.Field
 import com.tutuur.navigator.models.NavigationTarget
 import com.tutuur.navigator.models.NavigationTarget.Companion.PATTERN_ARRAY_NAME
@@ -102,7 +101,7 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
     private fun brewType(fields: List<Field>, parentFields: List<Field>): TypeSpec {
         // create type builder.
         val builder = TypeSpec.classBuilder(target.builderName)
-                .superclass(ClassName.get(IntentBuilder::class.java))
+                .superclass(ClassName.get("com.tutuur.navigator", "IntentBuilder"))
                 .addModifiers(Modifier.FINAL)
                 .addMethod(MethodSpec.constructorBuilder()
                         .build())

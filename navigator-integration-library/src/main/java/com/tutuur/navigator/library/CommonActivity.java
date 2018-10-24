@@ -1,7 +1,8 @@
-package com.tutuur.navigator;
+package com.tutuur.navigator.library;
 
-import android.app.Activity;
 import android.os.Bundle;
+
+import com.tutuur.navigator.BundleExtra;
 
 public class CommonActivity extends BaseActivity {
 
