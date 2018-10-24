@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
+import android.support.annotation.Nullable
 import com.squareup.javapoet.*
 import com.tutuur.compiler.extensions.*
 import com.tutuur.navigator.BundleExtra
@@ -219,27 +220,15 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
      */
     private fun brewBindMethod(fields: List<Field>): MethodSpec {
         val builder = MethodSpec.methodBuilder("bind")
-                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .addParameter(ClassName.get(target.element), "target")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override::class.java)
+                .addParameter(Object::class.java, "object")
                 .returns(TypeName.VOID)
-        if (env.isDerivedFromActivity(target.type)) {
-            builder
-                    .addStatement("\$T intent = target.getIntent()", Intent::class.java)
-                    .beginControlFlow("if (intent == null)")
-                    .addStatement("return")
-                    .endControlFlow()
-                    .addStatement("\$T bundle = intent.getExtras()", Bundle::class.java)
-        } else {
-            builder.addStatement("\$T bundle = target.getArguments()", Bundle::class.java)
-                    .beginControlFlow("if (bundle == null)")
-                    .addStatement("return")
-                    .endControlFlow()
-        }
-        builder.addStatement("\$T b = new \$T(bundle)", target.builderName, target.builderName)
+                .addStatement("\$T target = (\$T)(object)", target.className, target.className)
         fields.forEach { field ->
             val name = field.name
             builder.beginControlFlow("if (bundle.containsKey(\$S))", name)
-                    .addStatement("target.\$N = b.\$N()", name, name)
+                    .addStatement("target.\$N = \$N()", name, name)
                     .endControlFlow()
         }
         return builder.build()
@@ -293,7 +282,7 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
     private fun brewParseMethod(fields: List<Field>): MethodSpec {
         return MethodSpec.methodBuilder("parse")
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(ClassName.get("javax.annotation", "Nullable"))
+                .addAnnotation(Nullable::class.java)
                 .addParameter(String::class.java, "scheme")
                 .returns(target.builderName)
                 .addStatement("int index = scheme.indexOf(\"?\")")

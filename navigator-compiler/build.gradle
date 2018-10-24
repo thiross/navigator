@@ -25,6 +25,7 @@ dependencies {
     api project(':compiler-util')
     implementation project(':navigator-annotation')
 
+    implementation deps.support.annotations
     compileOnly deps.android.runtime
     compileOnly deps.auto.service
 

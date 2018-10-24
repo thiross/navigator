@@ -26,6 +26,12 @@ data class NavigationTarget(val element: TypeElement) {
         (element.enclosingElement as PackageElement).qualifiedName.toString()
     }
 
+
+    /**
+     * Navigation target class name.
+     */
+    val className = ClassName.get(type)
+
     /**
      * Bundle builder class name.
      */

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -322,6 +323,14 @@ public class IntentBuilder {
             bundle.putParcelableArrayList(name, list);
         }
         return this;
+    }
+
+    /**
+     * Bind extras to target fields.
+     *
+     * @param object the target, should be activity or fragment.
+     */
+    public void bind(Object object) {
     }
 
     /**
