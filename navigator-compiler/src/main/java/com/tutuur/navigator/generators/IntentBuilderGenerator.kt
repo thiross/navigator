@@ -8,6 +8,7 @@ import android.os.Parcelable
 import com.squareup.javapoet.*
 import com.tutuur.compiler.extensions.*
 import com.tutuur.navigator.BundleExtra
+import com.tutuur.navigator.Interceptor
 import com.tutuur.navigator.models.Field
 import com.tutuur.navigator.models.NavigationTarget
 import com.tutuur.navigator.models.NavigationTarget.Companion.PATTERN_ARRAY_NAME
@@ -16,6 +17,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 import javax.annotation.Nullable
 import javax.annotation.processing.ProcessingEnvironment
+import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
@@ -134,6 +136,9 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
                                 it.addStatement("return bundle.get\$NArray(\$S)", component, name)
                             env.isParcelableArray(type) ->
                                 it.addStatement("\$T[] pa = bundle.getParcelableArray(\$S)", Parcelable::class.java, name)
+                                        .beginControlFlow("if (pa == null)")
+                                        .addStatement("return null")
+                                        .endControlFlow()
                                         .addStatement("return \$T.copyOf(pa, pa.length, \$T.class)", Arrays::class.java, TypeName.get(type))
                             env.isStringList(type) ->
                                 it.addStatement("return bundle.getStringArrayList(\$S)", name)
@@ -170,6 +175,12 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
         }
         if (target.schemes.isNotEmpty()) {
             builder.addMethod(brewParseMethod(allFields))
+        }
+        builder.addMethod(brewStartMethod(env.context, target.interceptors, false))
+        builder.addMethod(brewStartMethod(env.activity, target.interceptors, true))
+        builder.addMethod(brewStartMethod(env.fragment, target.interceptors, true))
+        env.supportFragment?.let {
+            builder.addMethod(brewStartMethod(it, target.interceptors, true))
         }
         return builder.build()
     }
@@ -232,6 +243,21 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
                     .endControlFlow()
         }
         return builder.build()
+    }
+
+    private fun brewStartMethod(type: TypeMirror, interceptors: List<AnnotationValue>, hasRequestCode: Boolean): MethodSpec {
+        val name = if (hasRequestCode) "startActivityForResult" else "startActivity"
+        return MethodSpec.methodBuilder(name)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override::class.java)
+                .addParameter(TypeName.get(type), "context")
+                .also {
+                    if (hasRequestCode) {
+                        it.addParameter(TypeName.INT, "requestCode")
+                    }
+                }
+                .returns(TypeName.VOID)
+                .build()
     }
 
     /**

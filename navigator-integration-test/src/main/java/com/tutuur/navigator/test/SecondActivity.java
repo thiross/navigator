@@ -5,14 +5,20 @@ import android.os.Bundle;
 import com.tutuur.navigator.BundleExtra;
 import com.tutuur.navigator.Navigation;
 import com.tutuur.navigator.library.CommonActivity;
-import com.tutuur.navigator.test.model.Cat;
+import com.tutuur.navigator.test.interceptors.LoginInterceptor;
+import com.tutuur.navigator.test.models.Cat;
 
 import java.util.List;
 
-@Navigation(schemes = {
-        "example://second/:id",
-        "http://www.example.com/second/:id"
-})
+@Navigation(
+        schemes = {
+                "example://second/:id",
+                "http://www.example.com/second/:id"
+        },
+        interceptors = {
+                LoginInterceptor.class
+        }
+)
 public class SecondActivity extends CommonActivity {
 
     @BundleExtra(key = "flag")

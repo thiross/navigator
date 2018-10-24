@@ -3,7 +3,7 @@ package com.tutuur.navigator.test;
 import android.content.Intent;
 
 import com.google.common.collect.Lists;
-import com.tutuur.navigator.test.model.Cat;
+import com.tutuur.navigator.test.models.Cat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

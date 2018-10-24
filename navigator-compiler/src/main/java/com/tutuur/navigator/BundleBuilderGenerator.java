@@ -220,7 +220,7 @@ class BundleBuilderGenerator {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(List.class), interceptorClass), "interceptors")
                 .addParameter(ClassName.get(Intent.class), "intent");
         builder1.beginControlFlow("for ($T i : interceptors)", interceptorClass)
-                .beginControlFlow("if (i.intercept(context))")
+                .beginControlFlow("if (i.preIntercept(context))")
                 .addStatement("return true")
                 .endControlFlow()
                 .endControlFlow()

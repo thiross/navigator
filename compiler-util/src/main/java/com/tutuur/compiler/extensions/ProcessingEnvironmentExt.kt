@@ -51,24 +51,27 @@ fun ProcessingEnvironment.e(tag: String, message: String) {
     print(Diagnostic.Kind.ERROR, tag, message)
 }
 
+val ProcessingEnvironment.context: TypeMirror
+    get() = elements.mirrorOf(Fqdn.CONTEXT)
+
 /**
  * @return activity element from Fqdn.
  */
-val ProcessingEnvironment.activityElement: TypeElement
-    get() = elements.elementOf(Fqdn.ACTIVITY)
+val ProcessingEnvironment.activity: TypeMirror
+    get() = elements.mirrorOf(Fqdn.ACTIVITY)
 
 /**
  * @return fragment element from Fqdn.
  */
-val ProcessingEnvironment.fragmentElement: TypeElement
-    get() = elements.elementOf(Fqdn.FRAGMENT)
+val ProcessingEnvironment.fragment: TypeMirror
+    get() = elements.mirrorOf(Fqdn.FRAGMENT)
 
 /**
  * create support fragment element from Fqdn.
  * @return {@code null} if support library is not a dependency.
  */
-val ProcessingEnvironment.supportFragmentElement: TypeElement?
-    get() = elements.getTypeElement(Fqdn.SUPPORT_FRAGMENT)
+val ProcessingEnvironment.supportFragment: TypeMirror?
+    get() = elements.getTypeElement(Fqdn.SUPPORT_FRAGMENT)?.asType()
 
 /**
  * @return {@code true} if [type] is [String]

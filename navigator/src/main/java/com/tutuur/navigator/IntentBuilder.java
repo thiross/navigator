@@ -335,35 +335,12 @@ public class IntentBuilder {
     }
 
     /**
-     * @see Interceptor
-     */
-    protected boolean preIntercept(Context context) {
-        return false;
-    }
-
-    /**
-     * @see Interceptor
-     */
-    protected boolean intercept(Intent intent) {
-        return false;
-    }
-
-    /**
      * Start a target intent build by this builder.
      *
      * @param context the caller context.
-     * @return {@code true} on a successful navigation.
      */
-    public boolean startActivity(Context context) {
-        if (preIntercept(context)) {
-            return false;
-        }
-        Intent intent = build(context);
-        if (intercept(intent)) {
-            return false;
-        }
-        context.startActivity(intent);
-        return true;
+    public void startActivity(Context context) {
+        throw new RuntimeException("IntentBuilder doesn't implement startActivity method.");
     }
 
     /**
@@ -371,18 +348,9 @@ public class IntentBuilder {
      *
      * @param activity    the caller activity.
      * @param requestCode to identify request.
-     * @return {@code true} on a successful navigation.
      */
-    public boolean startActivityForResult(Activity activity, int requestCode) {
-        if (preIntercept(activity)) {
-            return false;
-        }
-        Intent intent = build(activity);
-        if (intercept(intent)) {
-            return false;
-        }
-        activity.startActivityForResult(intent, requestCode);
-        return true;
+    public void startActivityForResult(Activity activity, int requestCode) {
+        throw new RuntimeException("IntentBuilder doesn't implement startActivityForResult method.");
     }
 
     /**
@@ -390,18 +358,9 @@ public class IntentBuilder {
      *
      * @param fragment    the caller fragment.
      * @param requestCode to identify request.
-     * @return {@code true} on a successful navigation.
      */
-    public boolean startActivityForResult(Fragment fragment, int requestCode) {
-        if (preIntercept(fragment.getActivity())) {
-            return false;
-        }
-        Intent intent = build(fragment.getActivity());
-        if (intercept(intent)) {
-            return false;
-        }
-        fragment.startActivityForResult(intent, requestCode);
-        return true;
+    public void startActivityForResult(Fragment fragment, int requestCode) {
+        throw new RuntimeException("IntentBuilder doesn't implement startActivityForResult method.");
     }
 
     /**
@@ -409,17 +368,8 @@ public class IntentBuilder {
      *
      * @param fragment    the caller fragment.
      * @param requestCode to identify request.
-     * @return {@code true} on a successful navigation.
      */
-    public boolean startActivityForResult(android.support.v4.app.Fragment fragment, int requestCode) {
-        if (preIntercept(fragment.getActivity())) {
-            return false;
-        }
-        Intent intent = build(fragment.getActivity());
-        if (intercept(intent)) {
-            return false;
-        }
-        fragment.startActivityForResult(intent, requestCode);
-        return true;
+    public void startActivityForResult(android.support.v4.app.Fragment fragment, int requestCode) {
+        throw new RuntimeException("IntentBuilder doesn't implement startActivityForResult method.");
     }
 }

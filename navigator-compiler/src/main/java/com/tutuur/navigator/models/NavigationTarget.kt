@@ -2,6 +2,7 @@ package com.tutuur.navigator.models
 
 import com.squareup.javapoet.ClassName
 import com.tutuur.navigator.Navigation
+import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
@@ -39,6 +40,21 @@ data class NavigationTarget(val element: TypeElement) {
      * Uri scheme configurations.
      */
     val schemes = navigation?.schemes?.toList() ?: listOf()
+
+    /**
+     * interceptor class list.
+     */
+    val interceptors = element.annotationMirrors
+            .find {
+                it.annotationType.toString() == "com.tutuur.navigator.Navigation"
+            }?.elementValues
+            ?.entries
+            ?.find {
+                it.key.simpleName.toString() == "interceptors"
+            }?.let {
+                @Suppress("UNCHECKED_CAST")
+                it.value.value as List<AnnotationValue>
+            } ?: listOf()
 
     companion object {
         /**

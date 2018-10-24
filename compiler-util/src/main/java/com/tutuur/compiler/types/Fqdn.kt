@@ -22,6 +22,11 @@ internal object Fqdn {
     const val PARCELABLE = "android.os.Parcelable"
 
     /**
+     * Android `Context` Fqdn.
+     */
+    const val CONTEXT = "android.content.Context"
+
+    /**
      * Android `Activity` Fqdn.
      */
     const val ACTIVITY = "android.app.Activity"
