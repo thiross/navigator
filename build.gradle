@@ -16,7 +16,8 @@ buildscript {
                     reflect: "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}"
             ],
             android    : [
-                    runtime: 'com.google.android:android:4.1.1.4'
+                    runtime: 'com.google.android:android:4.1.1.4',
+                    plugin: 'com.android.tools.build:gradle:3.2.0'
             ],
             support    : [
                     annotations: "com.android.support:support-annotations:${versions.supportLibrary}",
@@ -38,7 +39,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.0'
+        classpath deps.android.plugin
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
         // NOTE: Do not place your application dependencies here; they belong

@@ -11,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class Navigator {
 
     private static final Map<Class<?>, Constructor<? extends IntentBuilder>> BUILDERS = new LinkedHashMap<>();

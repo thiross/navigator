@@ -1,4 +1,11 @@
+buildscript {
+    dependencies {
+        classpath files('../navigator-plugin/build/libs/navigator-plugin-0.9.4-SNAPSHOT.jar')
+    }
+}
+
 apply plugin: 'com.android.application'
+apply plugin: 'com.tutuur.navigator.plugin'
 
 android {
     compileSdkVersion versions.compileSdk
