@@ -1,5 +1,6 @@
 rootProject.name = "tutuur-navigator"
 include ':compiler-util',
+        ':navigator-const',
         ':navigator',
         ':navigator-annotation',
         ':navigator-compiler',

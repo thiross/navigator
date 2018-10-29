@@ -1,5 +1,6 @@
 buildscript {
     dependencies {
+        classpath files('../navigator-const/build/libs/navigator-const-0.9.4-SNAPSHOT.jar')
         classpath files('../navigator-plugin/build/libs/navigator-plugin-0.9.4-SNAPSHOT.jar')
     }
 }

@@ -36,6 +36,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':navigator-const')
     api project(':navigator-annotation')
 
     implementation deps.android.runtime

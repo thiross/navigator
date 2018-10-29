@@ -10,10 +10,11 @@ import com.squareup.javapoet.*
 import com.tutuur.compiler.extensions.*
 import com.tutuur.navigator.BundleExtra
 import com.tutuur.navigator.Interceptor
+import com.tutuur.navigator.constants.Constants.PATTERN_FIELD_NAME
 import com.tutuur.navigator.models.Comment.FILE_COMMENT
 import com.tutuur.navigator.models.Field
 import com.tutuur.navigator.models.NavigationTarget
-import com.tutuur.navigator.models.NavigationTarget.Companion.PATTERN_ARRAY_NAME
+import com.tutuur.navigator.models.Scheme
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -114,9 +115,7 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
                         .build())
         // create static pattern field.
         val allFields = parentFields + fields
-        if (target.schemes.isNotEmpty()) {
-            builder.addField(brewPatternField(target.schemes))
-        }
+        builder.addField(brewPatternField(target.scheme))
         // target bundle builder class.
         allFields.forEach { field ->
             val typeName = TypeName.get(field.type)
@@ -174,9 +173,7 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
             // create bind method.
             builder.addMethod(brewBindMethod(fields))
         }
-        if (target.schemes.isNotEmpty()) {
-            builder.addMethod(brewParseMethod(allFields))
-        }
+        builder.addMethod(brewParseMethod(allFields))
         builder.addMethod(brewStartMethod(env.context, target.interceptors, false))
         builder.addMethod(brewStartMethod(env.activity, target.interceptors, true))
         builder.addMethod(brewStartMethod(env.fragment, target.interceptors, true))
@@ -189,12 +186,19 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
     /**
      * create regex patterns for schemes.
      */
-    private fun brewPatternField(schemes: List<String>): FieldSpec {
-        val code = schemes.joinToString(prefix = "{", postfix = "}") {
-            """Pattern.compile("${it.replace(Regex.fromLiteral("."), "\\\\\\\\.")
-                    .replace(Regex(":([^/]+)"), "(?<$1>[^/]+)")}")"""
+    private fun brewPatternField(scheme: Scheme): FieldSpec {
+        val code = if (scheme.isEmpty()) {
+            "null"
+        } else {
+            if (scheme.subPage.isEmpty()) {
+                scheme.page
+            } else {
+                "${scheme.page}/${scheme.subPage}"
+            }.let {
+                """Pattern.compile("${it.replace(Regex(":([^/]+)"), "(?<$1>[^/]+)")}")"""
+            }
         }
-        return FieldSpec.builder(ArrayTypeName.get(Array<Pattern>::class.java), PATTERN_ARRAY_NAME)
+        return FieldSpec.builder(Pattern::class.java, PATTERN_FIELD_NAME)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .initializer(code)
                 .build()
@@ -282,63 +286,62 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
     private fun brewParseMethod(fields: List<Field>): MethodSpec {
         return MethodSpec.methodBuilder("parse")
                 .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override::class.java)
                 .addAnnotation(Nullable::class.java)
                 .addParameter(String::class.java, "scheme")
                 .returns(target.builderName)
                 .addStatement("int index = scheme.indexOf(\"?\")")
                 .addStatement("String main = index >= 0 ? scheme.substring(0, index) : scheme")
-                .beginControlFlow("for (\$T p : $PATTERN_ARRAY_NAME)", Pattern::class.java)
-                .addStatement("\$T m = p.matcher(main)", Matcher::class.java)
+                .addStatement("\$T m = $PATTERN_FIELD_NAME.matcher(main)", Matcher::class.java)
                 .beginControlFlow("if (!m.find())")
-                .addStatement("continue")
+                .addStatement("return null")
                 .endControlFlow()
-                .addStatement("\$T b = new \$T()", target.builderName, target.builderName)
                 .also {
-                    it.addStatement("\$T uri = \$T.parse(scheme)", Uri::class.java, Uri::class.java)
-                    fields.filter { field ->
+                    val fs = fields.filter { field ->
                         (field.isPrimitive || env.isString(field.type)) &&
                                 (field.annotation.autowired || field.annotation.key != "[undefined]")
-                    }.forEach { field ->
-                        val annotation = field.annotation
-                        val key = if (annotation.key != "[undefined]") {
-                            annotation.key
-                        } else {
-                            field.name
-                        }
-                        it.beginControlFlow("")
-                                .addStatement("String s")
-                                .beginControlFlow("try")
-                                .addStatement("s = m.group(\$S)", key)
-                                .nextControlFlow("catch(\$T e)", IllegalArgumentException::class.java)
-                                .addStatement("s = uri.getQueryParameter(\$S)", key)
-                                .endControlFlow()
-                                .beginControlFlow("if (s != null)")
-                                .also { _ ->
-                                    if (field.isPrimitive) {
-                                        it.beginControlFlow("try")
-                                                .addStatement("""b.${'$'}N(${when (field.type.kind) {
-                                                    TypeKind.BOOLEAN -> "s.equalsIgnoreCase(\"true\") || s.equalsIgnoreCase(\"1\") || s.equalsIgnoreCase(\"t\")"
-                                                    TypeKind.BYTE -> "Byte.parseByte(s)"
-                                                    TypeKind.CHAR -> "s.charAt(0)"
-                                                    TypeKind.SHORT -> "Short.parseShort(s)"
-                                                    TypeKind.INT -> "Integer.parseInt(s)"
-                                                    TypeKind.LONG -> "Long.parseLong(s)"
-                                                    TypeKind.FLOAT -> "Float.parseFloat(s)"
-                                                    TypeKind.DOUBLE -> "Double.parseDouble(s)"
-                                                    else -> "undefined"
-                                                }})""", field.name)
-                                                .endControlFlow("catch(\$T e) {}", IllegalFormatException::class.java)
-                                    } else {
-                                        it.addStatement("b.\$N = s", field.name)
-                                    }
-                                }
-                                .endControlFlow()
-                                .endControlFlow()
                     }
-                }
-                .addStatement("return b")
-                .endControlFlow()
-                .addStatement("return null")
+                    if (fs.isNotEmpty()) {
+                        it.addStatement("\$T uri = \$T.parse(scheme)", Uri::class.java, Uri::class.java)
+                        fs.forEach { field ->
+                            val annotation = field.annotation
+                            val key = if (annotation.key != "[undefined]") {
+                                annotation.key
+                            } else {
+                                field.name
+                            }
+                            it.beginControlFlow("")
+                                    .addStatement("String s")
+                                    .beginControlFlow("try")
+                                    .addStatement("s = m.group(\$S)", key)
+                                    .nextControlFlow("catch(\$T e)", IllegalArgumentException::class.java)
+                                    .addStatement("s = uri.getQueryParameter(\$S)", key)
+                                    .endControlFlow()
+                                    .beginControlFlow("if (s != null)")
+                                    .also { _ ->
+                                        if (field.isPrimitive) {
+                                            it.beginControlFlow("try")
+                                                    .addStatement("""${'$'}N(${when (field.type.kind) {
+                                                        TypeKind.BOOLEAN -> "s.equalsIgnoreCase(\"true\") || s.equalsIgnoreCase(\"1\") || s.equalsIgnoreCase(\"t\")"
+                                                        TypeKind.BYTE -> "Byte.parseByte(s)"
+                                                        TypeKind.CHAR -> "s.charAt(0)"
+                                                        TypeKind.SHORT -> "Short.parseShort(s)"
+                                                        TypeKind.INT -> "Integer.parseInt(s)"
+                                                        TypeKind.LONG -> "Long.parseLong(s)"
+                                                        TypeKind.FLOAT -> "Float.parseFloat(s)"
+                                                        TypeKind.DOUBLE -> "Double.parseDouble(s)"
+                                                        else -> "undefined"
+                                                    }})""", field.name)
+                                                    .endControlFlow("catch(\$T e) {}", IllegalFormatException::class.java)
+                                        } else {
+                                            it.addStatement("b.\$N = s", field.name)
+                                        }
+                                    }
+                                    .endControlFlow()
+                                    .endControlFlow()
+                        }
+                    }
+                }.addStatement("return this")
                 .build()
     }
 

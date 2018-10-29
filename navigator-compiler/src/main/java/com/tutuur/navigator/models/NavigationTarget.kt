@@ -2,6 +2,7 @@ package com.tutuur.navigator.models
 
 import com.squareup.javapoet.ClassName
 import com.tutuur.navigator.Navigation
+import com.tutuur.navigator.constants.Constants.INTENT_BUILDER_CLASS_SUFFIX
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.PackageElement
@@ -35,7 +36,8 @@ data class NavigationTarget(val element: TypeElement) {
     /**
      * Bundle builder class name.
      */
-    val builderName: ClassName = ClassName.get(packageName, "${element.simpleName}_IntentBuilder")
+    val builderName: ClassName =
+            ClassName.get(packageName, "${element.simpleName}$INTENT_BUILDER_CLASS_SUFFIX")
 
     /**
      * [Navigation] annotation on [element]
@@ -45,7 +47,11 @@ data class NavigationTarget(val element: TypeElement) {
     /**
      * Uri scheme configurations.
      */
-    val schemes = navigation?.schemes?.toList() ?: listOf()
+    val scheme = if (navigation == null) {
+        Scheme.EMPTY
+    } else {
+        Scheme(navigation.page, navigation.subpage)
+    }
 
     /**
      * interceptor class list.
@@ -64,13 +70,6 @@ data class NavigationTarget(val element: TypeElement) {
                 it.value as TypeMirror
             }
             ?: listOf()
-
-    companion object {
-        /**
-         * Scheme matching pattern array name.
-         */
-        const val PATTERN_ARRAY_NAME = "PATTERNS"
-    }
 
     override fun equals(other: Any?) =
             if (other is NavigationTarget) {

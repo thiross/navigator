@@ -326,6 +326,16 @@ public class IntentBuilder {
     }
 
     /**
+     * Parse {@code path} and set fields from {@code path} segments.
+     *
+     * @param path part of scheme uri.
+     * @return null if parsing failed.
+     */
+    public IntentBuilder parse(String path) {
+        return null;
+    }
+
+    /**
      * Bind extras to target fields.
      *
      * @param object the target, should be activity or fragment.

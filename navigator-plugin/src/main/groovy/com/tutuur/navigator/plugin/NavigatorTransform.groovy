@@ -1,10 +1,10 @@
 package com.tutuur.navigator.plugin
 
-import com.android.build.api.transform.QualifiedContent
-import com.android.build.api.transform.Transform
-import com.android.build.api.transform.TransformException
-import com.android.build.api.transform.TransformInvocation
+import com.android.SdkConstants
+import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
+import com.android.tools.r8.com.google.common.collect.ImmutableSet
+import com.tutuur.navigator.constants.Constants
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOCase
 import org.apache.commons.io.filefilter.SuffixFileFilter
@@ -14,8 +14,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.zip.ZipFile
 
 class NavigatorTransform extends Transform {
-
-    static final String INTENT_BUILDER_CLASS_POSTFIX = "_IntentBuilder.class"
 
     @Override
     String getName() {
@@ -46,29 +44,41 @@ class NavigatorTransform extends Transform {
         }
     }
 
+    static def getClassFromPath(String path, String prefix = null) {
+        int start = prefix == null ? 0 : prefix.length() + 1
+        return path.substring(start, path.length() - SdkConstants.DOT_CLASS.length() - 1)
+                .replace(File.separatorChar, '.' as char)
+    }
+
     @Override
     void transform(TransformInvocation invocation)
             throws TransformException, InterruptedException, IOException {
+        final suffix = Constants.INTENT_BUILDER_CLASS_SUFFIX + SdkConstants.DOT_CLASS
         Set<String> jarClasses = Collections.newSetFromMap(new ConcurrentHashMap<>())
         Set<String> appClasses = Collections.newSetFromMap(new ConcurrentHashMap<>())
         invocation.getInputs().each { input ->
             input.jarInputs.parallelStream().each { jarInput ->
+                File jarOutputDirectory = invocation.outputProvider
+                        .getContentLocation(jarInput.name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
+                FileUtils.copyFile(jarInput.file, jarOutputDirectory)
                 jarClasses.addAll(getJarContent(jarInput.file).findAll {
-                    it.endsWith(INTENT_BUILDER_CLASS_POSTFIX)
-                }.collect { it.replace(File.separatorChar, '.') })
+                    it.endsWith(suffix)
+                }.collect { getClassFromPath(it) })
             }
             input.directoryInputs.parallelStream().each { dirInput ->
-                println(dirInput.file.absolutePath)
+                File classOutputDirectory = invocation.outputProvider
+                        .getContentLocation(dirInput.name, dirInput.contentTypes, dirInput.scopes, Format.DIRECTORY)
+                FileUtils.copyDirectory(dirInput.file, classOutputDirectory)
                 appClasses.addAll(FileUtils.listFiles(dirInput.file,
-                        new SuffixFileFilter(".class", IOCase.INSENSITIVE),
+                        new SuffixFileFilter(SdkConstants.DOT_CLASS, IOCase.INSENSITIVE),
                         TrueFileFilter.INSTANCE).findAll { file ->
-                    file.absolutePath.endsWith(INTENT_BUILDER_CLASS_POSTFIX)
-                }.collect {
-                    it.absolutePath
-                            .substring(dirInput.file.absolutePath.length() + 1)
-                            .replace(File.separatorChar, '.')
-                })
+                    file.absolutePath.endsWith(suffix)
+                }.collect { getClassFromPath(it.absolutePath, dirInput.file.absolutePath) })
             }
         }
+        final outputDirectory = invocation.outputProvider
+                .getContentLocation(name, TransformManager.CONTENT_CLASS, ImmutableSet.of(QualifiedContent.Scope.PROJECT), Format.DIRECTORY)
+        new NavigatorServiceGenerator(jarClasses, appClasses, outputDirectory)
+                .generate()
     }
 }

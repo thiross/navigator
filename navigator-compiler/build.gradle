@@ -21,8 +21,8 @@ dependencies {
 
     // api 'com.tutuur.android:compiler-util:0.9.3'
     // implementation 'com.tutuur.android:navigator-annotation:0.9.3'
-
     api project(':compiler-util')
+    implementation project(':navigator-const')
     implementation project(':navigator-annotation')
 
     implementation deps.support.annotations

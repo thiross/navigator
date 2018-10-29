@@ -14,7 +14,24 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface Navigation {
 
-    String[] schemes() default {};
+    /**
+     * Scheme uri segment after host.
+     *
+     * @return scheme page part.
+     */
+    String page() default "";
 
+    /**
+     * Scheme uri segment after page.
+     *
+     * @return scheme subpage part.
+     */
+    String subpage() default "";
+
+    /**
+     * Navigation interceptor chains.
+     *
+     * @return Navigation interceptors.
+     */
     Class<? extends Interceptor>[] interceptors() default {};
 }

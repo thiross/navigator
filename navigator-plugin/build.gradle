@@ -1,8 +1,10 @@
 apply plugin: 'groovy'
 
 dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile gradleApi()
     compile localGroovy()
-    implementation deps.android.plugin
+    compile project(':navigator-const')
+    compile deps.android.plugin
 }
 

@@ -11,15 +11,7 @@ import com.tutuur.navigator.test.models.Cat;
 
 import java.util.List;
 
-@Navigation(
-        schemes = {
-                "example://second/:id",
-                "http://www.example.com/second/:id"
-        },
-        interceptors = {
-                LoginInterceptor.class
-        }
-)
+@Navigation(page = "second", subpage = ":id", interceptors = {LoginInterceptor.class})
 public class SecondActivity extends CommonActivity {
 
     @BundleExtra(key = "flag")
