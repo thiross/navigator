@@ -285,8 +285,9 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
                     it.addStatement("\$T intent = build($context)", Intent::class.java)
                     if (interceptors.isNotEmpty()) {
                         it.beginControlFlow("for (\$T it : its)", Interceptor::class.java)
-                                .addStatement("if (it.intercept(intent))")
+                                .beginControlFlow("if (it.intercept(intent))")
                                 .addStatement("return")
+                                .endControlFlow()
                                 .endControlFlow()
                     }
                     if (hasRequestCode) {
@@ -353,7 +354,7 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
                                                     }})""", field.name)
                                                     .endControlFlow("catch(\$T e) {}", IllegalFormatException::class.java)
                                         } else {
-                                            it.addStatement("b.\$N = s", field.name)
+                                            it.addStatement("\$N(s)", field.name)
                                         }
                                     }
                                     .endControlFlow()

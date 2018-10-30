@@ -5,6 +5,9 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.util.Log;
+
+import com.tutuur.navigator.constants.Constants;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -68,7 +71,7 @@ public class Navigator {
         }
         try {
             String clsName = cls.getName();
-            Class<?> builderClass = cls.getClassLoader().loadClass(clsName + "_IntentBuilder");
+            Class<?> builderClass = cls.getClassLoader().loadClass(clsName + Constants.INTENT_BUILDER_CLASS_SUFFIX);
             //noinspection unchecked
             constructor = (Constructor<? extends IntentBuilder>) builderClass.getConstructor(Bundle.class);
         } catch (ClassNotFoundException e) {
@@ -127,6 +130,7 @@ public class Navigator {
         } catch (IllegalAccessException e) {
             throw new RuntimeException("init method of " + PATTERN_INIT_CLASS + " failure.");
         } catch (InvocationTargetException e) {
+            Log.e("DEFG", "abc", e);
             throw new RuntimeException("init method of " + PATTERN_INIT_CLASS + " failure.");
         }
         finderInitialized = true;

@@ -35,7 +35,7 @@ public class SecondActivity extends CommonActivity {
     @BundleExtra
     double doubleValue;
 
-    @BundleExtra
+    @BundleExtra(key = "id")
     String stringValue;
 
     @BundleExtra

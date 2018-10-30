@@ -56,7 +56,7 @@ class NavigatorServiceGenerator {
             mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Class", "getConstructor", "([Ljava/lang/Class;)Ljava/lang/reflect/Constructor;", false)
 
             // stack:
-            mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false)
+            mv.visitMethodInsn(Opcodes.INVOKEINTERFACE, "java/util/Map", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", true)
             mv.visitInsn(Opcodes.POP)
 
             // }
