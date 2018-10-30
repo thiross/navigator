@@ -10,6 +10,7 @@ import com.squareup.javapoet.*
 import com.tutuur.compiler.extensions.*
 import com.tutuur.navigator.BundleExtra
 import com.tutuur.navigator.Interceptor
+import com.tutuur.navigator.constants.Constants.PAGE_FIELD_NAME
 import com.tutuur.navigator.constants.Constants.PATTERN_FIELD_NAME
 import com.tutuur.navigator.models.Comment.FILE_COMMENT
 import com.tutuur.navigator.models.Field
@@ -106,15 +107,18 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
         // create type builder.
         val builder = TypeSpec.classBuilder(target.builderName)
                 .superclass(ClassName.get("com.tutuur.navigator", "IntentBuilder"))
-                .addModifiers(Modifier.FINAL)
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addMethod(MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
                         .build())
                 .addMethod(MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
                         .addParameter(Bundle::class.java, "bundle")
                         .addStatement("super(bundle)")
                         .build())
         // create static pattern field.
         val allFields = parentFields + fields
+        builder.addField(brewPageField(target.scheme))
         builder.addField(brewPatternField(target.scheme))
         // target bundle builder class.
         allFields.forEach { field ->
@@ -181,6 +185,21 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
             builder.addMethod(brewStartMethod(it, target.interceptors, true))
         }
         return builder.build()
+    }
+
+    private fun brewPageField(scheme: Scheme): FieldSpec {
+        if (!scheme.isEmpty() && scheme.page.startsWith('/')) {
+            env.e(TAG, "page should not start with `/'. ${target.className}")
+        }
+        val code = if (scheme.isEmpty()) {
+            "null"
+        } else {
+            "\"${scheme.page}\""
+        }
+        return FieldSpec.builder(String::class.java, PAGE_FIELD_NAME)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .initializer(code)
+                .build()
     }
 
     /**

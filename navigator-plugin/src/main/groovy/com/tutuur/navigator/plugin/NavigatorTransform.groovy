@@ -46,8 +46,9 @@ class NavigatorTransform extends Transform {
 
     static def getClassFromPath(String path, String prefix = null) {
         int start = prefix == null ? 0 : prefix.length() + 1
-        return path.substring(start, path.length() - SdkConstants.DOT_CLASS.length() - 1)
+        return path.substring(start, path.length() - SdkConstants.DOT_CLASS.length())
                 .replace(File.separatorChar, '.' as char)
+                .replace('.', '/')
     }
 
     @Override

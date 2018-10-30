@@ -17,5 +17,6 @@ public class MainActivity extends Activity {
 
     public void navigateTo(View view) {
         IntentBuilder builder = Navigator.parse("/second/12");
+        builder.startActivity(this);
     }
 }
