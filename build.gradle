@@ -54,6 +54,9 @@ subprojects { project ->
 
     repositories {
         google()
+        maven {
+            url "https://dl.bintray.com/thiross/mvn"
+        }
         jcenter()
     }
 }

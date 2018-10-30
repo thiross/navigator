@@ -1,11 +1,11 @@
 apply plugin: 'groovy'
-apply plugin: 'java-gradle-plugin'
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile gradleApi()
     compile localGroovy()
-    compile project(':navigator-const')
+    compile 'com.tutuur.android:navigator-const:0.9.4'
+    // compile project(':navigator-const')
     compile deps.android.plugin
 }
 
+apply from: '../upload-maven.gradle'

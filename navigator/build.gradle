@@ -36,9 +36,13 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':navigator-const')
-    api project(':navigator-annotation')
+    implementation ('com.tutuur.android:navigator-const:0.9.4')
+    api ('com.tutuur.android:navigator-annotation:0.9.4')
+    // implementation project(':navigator-const')
+    // api project(':navigator-annotation')
 
     implementation deps.android.runtime
     api deps.support.fragment
 }
+
+apply from: '../upload-aar-maven.gradle'

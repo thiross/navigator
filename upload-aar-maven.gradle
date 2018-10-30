@@ -1,0 +1,47 @@
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact sourcesJar
+            artifact "$buildDir/outputs/aar/${project.name}-release.aar"
+
+            groupId GROUP
+            artifactId project.name
+            version VERSION_NAME
+        }
+    }
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    publications = ['maven']
+
+    pkg {
+        repo = VERSION_NAME.endsWith("SNAPSHOT") ? "snapshot" : "mvn"
+        name = project.name
+        vcsUrl = PROJECT_SCM
+        websiteUrl = PROJECT_URL
+        publish = true
+        publicDownloadNumbers = true
+        licenses = ['Apache-2.0']
+
+        version {
+            name = VERSION_NAME
+            desc = PROJECT_DESCRIPTION
+            released = new Date()
+        }
+    }
+}
+
