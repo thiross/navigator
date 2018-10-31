@@ -40,17 +40,17 @@ public class SimpleActivityTest {
                 "A", "B", "D", "C"
         );
 
-//        Navigator.navigateToSecondActivity()
-//                .charValue(charValue)
-//                .byteValue(byteValue)
-//                .shortValue(shortValue)
-//                .intValue(intValue)
-//                .floatValue(floatValue)
-//                .doubleValue(doubleValue)
-//                .stringValue(stringValue)
-//                .cat(cat)
-//                .stringList(stringList)
-//                .startActivity(mainActivity);
+        new SecondActivity__IntentBuilder()
+                .charValue(charValue)
+                .byteValue(byteValue)
+                .shortValue(shortValue)
+                .intValue(intValue)
+                .floatValue(floatValue)
+                .doubleValue(doubleValue)
+                .stringValue(stringValue)
+                .cat(cat)
+                .stringList(stringList)
+                .startActivity(mainActivity);
 
         ShadowApplication application = shadowOf(RuntimeEnvironment.application);
         final Intent intent = application.getNextStartedActivity();
