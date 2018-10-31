@@ -19,19 +19,16 @@ compileTestKotlin {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    api 'com.tutuur.android:compiler-util:0.9.4'
-    implementation 'com.tutuur.android:navigator-const:0.9.4'
-    implementation 'com.tutuur.android:navigator-annotation:0.9.4'
-    // api project(':compiler-util')
-    // implementation project(':navigator-const')
-    // implementation project(':navigator-annotation')
-
+    implementation deps.kotlin.reflect
+    implementation deps.tutuur.const
+    implementation deps.tutuur.annotation
     implementation deps.support.annotations
+
     compileOnly deps.android.runtime
     compileOnly deps.auto.service
 
     api deps.javapoet
-    implementation deps.kotlin.reflect
+    api deps.tutuur.compilerutil
 }
 
 apply from: '../upload-maven.gradle'

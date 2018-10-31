@@ -3,8 +3,7 @@ apply plugin: 'groovy'
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'com.tutuur.android:navigator-const:0.9.4'
-    // compile project(':navigator-const')
+    compile deps.tutuur.const
     compile deps.android.plugin
 }
 

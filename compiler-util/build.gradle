@@ -19,11 +19,10 @@ compileTestKotlin {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     implementation deps.kotlin.stdlib
+
     compileOnly deps.android.runtime
     compileOnly deps.javapoet
-
 }
 
 apply from: '../upload-maven.gradle'

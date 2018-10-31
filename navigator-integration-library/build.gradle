@@ -35,8 +35,10 @@ android {
 }
 
 dependencies {
-    implementation project(':navigator')
-    annotationProcessor project(':navigator-compiler')
+    implementation deps.support.annotations
+    implementation deps.tutuur.navigator
+    annotationProcessor deps.tutuur.compiler
+
     testImplementation deps.junit
     testImplementation deps.truth
 }

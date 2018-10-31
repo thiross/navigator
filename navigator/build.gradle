@@ -34,14 +34,24 @@ android {
     }
 }
 
+configurations {
+    all {
+        exclude group: 'com.google.android'
+        exclude group: 'org.json', module: 'json'
+        exclude module: 'commons-logging'
+        exclude module: 'httpclient'
+        exclude module: 'opengl-api'
+        exclude module: 'xmlParserAPIs'
+        exclude module: 'xpp3'
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation ('com.tutuur.android:navigator-const:0.9.4')
-    api ('com.tutuur.android:navigator-annotation:0.9.4')
-    // implementation project(':navigator-const')
-    // api project(':navigator-annotation')
-
+    implementation deps.tutuur.const
     implementation deps.android.runtime
+
+    api deps.tutuur.annotation
     api deps.support.fragment
 }
 

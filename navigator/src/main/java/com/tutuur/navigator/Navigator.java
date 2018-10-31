@@ -17,7 +17,7 @@ import java.util.Map;
 
 import static com.tutuur.navigator.constants.Constants.PATTERN_INIT_CLASS;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "unchecked"})
 public class Navigator {
 
     private static final Map<Class<?>, Constructor<? extends IntentBuilder>> BUILDERS = new LinkedHashMap<>();
@@ -72,7 +72,6 @@ public class Navigator {
         try {
             String clsName = cls.getName();
             Class<?> builderClass = cls.getClassLoader().loadClass(clsName + Constants.INTENT_BUILDER_CLASS_SUFFIX);
-            //noinspection unchecked
             constructor = (Constructor<? extends IntentBuilder>) builderClass.getConstructor(Bundle.class);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("can't find builder class for " + cls.getSimpleName());

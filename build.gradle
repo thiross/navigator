@@ -17,14 +17,21 @@ buildscript {
             ],
             android    : [
                     runtime: 'com.google.android:android:4.1.1.4',
-                    plugin: 'com.android.tools.build:gradle:3.2.0'
+                    plugin : 'com.android.tools.build:gradle:3.2.0'
             ],
             support    : [
                     annotations: "com.android.support:support-annotations:${versions.supportLibrary}",
-                    fragment: "com.android.support:support-fragment:${versions.supportLibrary}"
+                    fragment   : "com.android.support:support-fragment:${versions.supportLibrary}"
             ],
             auto       : [
                     service: 'com.google.auto.service:auto-service:1.0-rc4'
+            ],
+            tutuur     : [
+                    'compilerutil': "com.tutuur.android:compiler-util:${VERSION_NAME}",
+                    'annotation'  : "com.tutuur.android:navigator-annotation:${VERSION_NAME}",
+                    'compiler'    : "com.tutuur.android:navigator-compiler:${VERSION_NAME}",
+                    'const'       : "com.tutuur.android:navigator-const:${VERSION_NAME}",
+                    'navigator'   : "com.tutuur.android:navigator:${VERSION_NAME}",
             ],
             guava      : 'com.google.guava:guava:24.0-jre',
             javapoet   : 'com.squareup:javapoet:1.11.1',
@@ -42,6 +49,7 @@ buildscript {
         classpath deps.android.plugin
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}"
+        classpath "com.tutuur.android:navigator-plugin:${VERSION_NAME}"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -54,9 +62,6 @@ subprojects { project ->
 
     repositories {
         google()
-        maven {
-            url "https://dl.bintray.com/thiross/mvn"
-        }
         jcenter()
     }
 }
