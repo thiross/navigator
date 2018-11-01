@@ -90,9 +90,11 @@ public class Navigator {
             throw new RuntimeException("path must start with `/`");
         }
         int index = path.indexOf('/', 1);
-        String page = path;
+        String page;
         if (index >= 0) {
             page = path.substring(1, index);
+        } else {
+            page = path.substring(1);
         }
         synchronized (FINDERS) {
             if (!finderInitialized) {

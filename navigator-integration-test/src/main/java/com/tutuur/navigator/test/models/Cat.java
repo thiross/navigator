@@ -4,8 +4,6 @@ import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.common.base.Objects;
-
 public class Cat implements Parcelable {
 
     private String name;
@@ -51,7 +49,7 @@ public class Cat implements Parcelable {
         if (o == null || getClass() != o.getClass()) return false;
         Cat cat = (Cat) o;
         return gender == cat.gender &&
-                Objects.equal(name, cat.name);
+                (name == null ? cat.name == null : name.equals(cat.name));
     }
 
     @SuppressLint("DefaultLocale")
