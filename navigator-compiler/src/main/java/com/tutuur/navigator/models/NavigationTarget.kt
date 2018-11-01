@@ -31,7 +31,7 @@ data class NavigationTarget(val element: TypeElement) {
     /**
      * Navigation target class name.
      */
-    val className = ClassName.get(type)
+    val className = ClassName.get(type)!!
 
     /**
      * Bundle builder class name.

@@ -7,7 +7,7 @@ package com.tutuur.navigator.models
  */
 data class Scheme(val page: String, val subPage: String) {
 
-    fun isEmpty() = page.isEmpty() && subPage.isEmpty()
+    fun isEmpty() = page.isEmpty()
 
     companion object {
         val EMPTY = Scheme("", "")

@@ -188,8 +188,8 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
     }
 
     private fun brewPageField(scheme: Scheme): FieldSpec {
-        if (!scheme.isEmpty() && scheme.page.startsWith('/')) {
-            env.e(TAG, "page should not start with `/'. ${target.className}")
+        if (!scheme.isEmpty() && scheme.page.contains('/')) {
+            env.e(TAG, "page must not contains `/` ${target.className}")
         }
         val code = if (scheme.isEmpty()) {
             "null"
