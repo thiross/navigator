@@ -1,0 +1,2 @@
+-keep public class com.tutuur.navigator.generated.services.NavigatorPatternInit { *; }
+-keep public class * extends com.tutuur.navigator.IntentBuilder { *; }

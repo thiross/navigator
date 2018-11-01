@@ -15,7 +15,7 @@ android {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.compileSdk
         buildToolsVersion versions.buildTools
-        versionCode 1
+        versionCode 30
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -23,6 +23,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -34,6 +38,10 @@ android {
             includeAndroidResources = true
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
@@ -42,6 +50,8 @@ dependencies {
 
     implementation project(':navigator-integration-library')
     implementation deps.guava
+    implementation deps.support.fragment
+    implementation deps.support.annotations
 
     testImplementation deps.junit
     testImplementation deps.truth

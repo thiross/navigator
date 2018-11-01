@@ -20,7 +20,7 @@ publishing {
                 final dependenciesNode = asNode().appendNode('dependencies')
 
                 ext.addDependency = { Dependency dep, String scope ->
-                    if (dep.group == null || dep.version == null || dep.name == null || dep.name == "unspecified")
+                    if (dep.group == null || dep.group != GROUP || dep.version == null || dep.name == null || dep.name == "unspecified")
                         return // ignore invalid dependencies
 
                     final dependencyNode = dependenciesNode.appendNode('dependency')

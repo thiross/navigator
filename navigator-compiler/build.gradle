@@ -24,7 +24,7 @@ dependencies {
     implementation deps.tutuur.annotation
     implementation deps.support.annotations
 
-    compileOnly deps.android.runtime
+    implementation deps.android.runtime
     compileOnly deps.auto.service
 
     api deps.javapoet

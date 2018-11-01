@@ -5,7 +5,7 @@ targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation deps.android.runtime
+    compileOnly deps.android.runtime
 }
 
 apply from: "../upload-maven.gradle"
