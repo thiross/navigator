@@ -18,7 +18,7 @@ android {
         versionCode 30
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -51,4 +51,9 @@ dependencies {
     testImplementation deps.junit
     testImplementation deps.truth
     testImplementation deps.robolectric
+
+    androidTestImplementation deps.truth
+    androidTestImplementation deps.android.runner
+    androidTestImplementation deps.android.rules
+    androidTestImplementation deps.android.junit
 }

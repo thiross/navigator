@@ -17,7 +17,10 @@ buildscript {
             ],
             android    : [
                     runtime: 'com.google.android:android:4.1.1.4',
-                    plugin : 'com.android.tools.build:gradle:3.2.0'
+                    plugin : 'com.android.tools.build:gradle:3.2.0',
+                    runner : 'androidx.test:runner:1.1.0',
+                    rules  : 'androidx.test:rules:1.1.0',
+                    junit  : 'androidx.test.ext:junit:1.0.0'
             ],
             support    : [
                     annotations: "com.android.support:support-annotations:${versions.supportLibrary}",
