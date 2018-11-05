@@ -13,7 +13,7 @@ data class Field(val element: VariableElement, val annotation: BundleExtra) {
     val type: TypeMirror = element.asType()
 
     /**
-     * Component name for `get` method in `IntentBuilder`.
+     * Component name for `get` method in `BundleBuilder`.
      * For example `Byte` in {@code getByte} method.
      */
     val component = run {

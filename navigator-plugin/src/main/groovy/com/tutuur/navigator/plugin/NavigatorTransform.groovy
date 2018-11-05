@@ -54,7 +54,7 @@ class NavigatorTransform extends Transform {
     @Override
     void transform(TransformInvocation invocation)
             throws TransformException, InterruptedException, IOException {
-        final suffix = Constants.INTENT_BUILDER_CLASS_SUFFIX + SdkConstants.DOT_CLASS
+        final suffix = Constants.BUNDLE_BUILDER_CLASS_SUFFIX + SdkConstants.DOT_CLASS
         Set<String> jarClasses = Collections.newSetFromMap(new ConcurrentHashMap<>())
         Set<String> appClasses = Collections.newSetFromMap(new ConcurrentHashMap<>())
         invocation.getInputs().each { input ->

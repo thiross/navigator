@@ -2,10 +2,9 @@ package com.tutuur.navigator.processors
 
 import com.squareup.javapoet.JavaFile
 import com.tutuur.compiler.extensions.e
-import com.tutuur.compiler.extensions.w
 import com.tutuur.navigator.BundleExtra
 import com.tutuur.navigator.Navigation
-import com.tutuur.navigator.generators.IntentBuilderGenerator
+import com.tutuur.navigator.generators.BundleBuilderGenerator
 import com.tutuur.navigator.models.NavigationTarget
 import java.io.IOException
 import javax.annotation.processing.AbstractProcessor
@@ -41,7 +40,7 @@ class NavigatorProcessorKt : AbstractProcessor() {
         navigations.asSequence()
                 .map { NavigationTarget(it as TypeElement) }
                 .distinct()
-                .map { IntentBuilderGenerator(it, env) }.toList()
+                .map { BundleBuilderGenerator(it, env) }.toList()
                 .forEach { createFile(it.brewJava()) }
         return false
     }

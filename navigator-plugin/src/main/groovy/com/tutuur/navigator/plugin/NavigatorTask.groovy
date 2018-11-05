@@ -14,6 +14,7 @@ import org.gradle.api.tasks.TaskAction
 import java.util.zip.ZipFile
 
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ARTIFACT_TYPE
+import static com.tutuur.navigator.constants.Constants.BUNDLE_BUILDER_CLASS_SUFFIX
 
 @CacheableTask
 class NavigatorTask extends DefaultTask {
@@ -55,12 +56,12 @@ class NavigatorTask extends DefaultTask {
                 return []
             }
             return getJarContent(dependency.absoluteFile).findAll {
-                it.endsWith("_IntentBuilder.class")
+                it.endsWith(BUNDLE_BUILDER_CLASS_SUFFIX)
             }
         }
         final localBuilderClasses = new UnionFileCollection(variant.javaCompiler.source, project.fileTree(generateOutputFold))
                 .collect { it.absolutePath }
-                .findAll { it.endsWith("_IntentBuilder.java") }
+                .findAll { it.endsWith(BUNDLE_BUILDER_CLASS_SUFFIX) }
         jarBuilderClasses.each { println(it) }
         localBuilderClasses.each { println(it) }
     }

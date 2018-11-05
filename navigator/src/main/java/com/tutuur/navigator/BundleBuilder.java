@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,19 +15,19 @@ import java.util.List;
  * {@link Intent} builder helper class. to create bundles.
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
-public class IntentBuilder {
+public class BundleBuilder {
 
     /**
      * The target bundle.
      */
     protected final Bundle bundle;
 
-    public IntentBuilder() {
+    public BundleBuilder() {
         // initialize target bundle.
         bundle = new Bundle();
     }
 
-    public IntentBuilder(Bundle bundle) {
+    public BundleBuilder(Bundle bundle) {
         this.bundle = bundle;
     }
 
@@ -39,7 +38,7 @@ public class IntentBuilder {
      * @param value byte value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, byte value) {
+    public BundleBuilder put(String name, byte value) {
         if (value != 0) {
             bundle.putByte(name, value);
         }
@@ -53,7 +52,7 @@ public class IntentBuilder {
      * @param value char value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, char value) {
+    public BundleBuilder put(String name, char value) {
         if (value != 0) {
             bundle.putChar(name, value);
         }
@@ -67,7 +66,7 @@ public class IntentBuilder {
      * @param value short value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, short value) {
+    public BundleBuilder put(String name, short value) {
         if (value != 0) {
             bundle.putShort(name, value);
         }
@@ -81,7 +80,7 @@ public class IntentBuilder {
      * @param value int value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, int value) {
+    public BundleBuilder put(String name, int value) {
         if (value != 0) {
             bundle.putInt(name, value);
         }
@@ -95,7 +94,7 @@ public class IntentBuilder {
      * @param value float value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, float value) {
+    public BundleBuilder put(String name, float value) {
         if (value != 0.0f) {
             bundle.putFloat(name, value);
         }
@@ -109,7 +108,7 @@ public class IntentBuilder {
      * @param value double value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, double value) {
+    public BundleBuilder put(String name, double value) {
         if (value != 0.0) {
             bundle.putDouble(name, value);
         }
@@ -123,7 +122,7 @@ public class IntentBuilder {
      * @param value string value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, String value) {
+    public BundleBuilder put(String name, String value) {
         if (value != null) {
             bundle.putString(name, value);
         }
@@ -137,7 +136,7 @@ public class IntentBuilder {
      * @param value serializable value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, Serializable value) {
+    public BundleBuilder put(String name, Serializable value) {
         if (value != null) {
             bundle.putSerializable(name, value);
         }
@@ -151,7 +150,7 @@ public class IntentBuilder {
      * @param value parcelable value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, Parcelable value) {
+    public BundleBuilder put(String name, Parcelable value) {
         if (value != null) {
             bundle.putParcelable(name, value);
         }
@@ -165,7 +164,7 @@ public class IntentBuilder {
      * @param value {@code byte[]} value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, byte[] value) {
+    public BundleBuilder put(String name, byte[] value) {
         if (value != null) {
             bundle.putByteArray(name, value);
         }
@@ -179,7 +178,7 @@ public class IntentBuilder {
      * @param value {@code char[]} value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, char[] value) {
+    public BundleBuilder put(String name, char[] value) {
         if (value != null) {
             bundle.putCharArray(name, value);
         }
@@ -193,7 +192,7 @@ public class IntentBuilder {
      * @param value {@code short[]} value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, short[] value) {
+    public BundleBuilder put(String name, short[] value) {
         if (value != null) {
             bundle.putShortArray(name, value);
         }
@@ -207,7 +206,7 @@ public class IntentBuilder {
      * @param value {@code int[]} value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, int[] value) {
+    public BundleBuilder put(String name, int[] value) {
         if (value != null) {
             bundle.putIntArray(name, value);
         }
@@ -221,7 +220,7 @@ public class IntentBuilder {
      * @param value {@code long[]} value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, long[] value) {
+    public BundleBuilder put(String name, long[] value) {
         if (value != null) {
             bundle.putLongArray(name, value);
         }
@@ -235,7 +234,7 @@ public class IntentBuilder {
      * @param value {@code float[]} value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, float[] value) {
+    public BundleBuilder put(String name, float[] value) {
         if (value != null) {
             bundle.putFloatArray(name, value);
         }
@@ -249,7 +248,7 @@ public class IntentBuilder {
      * @param value {@code double[]} value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, double[] value) {
+    public BundleBuilder put(String name, double[] value) {
         if (value != null) {
             bundle.putDoubleArray(name, value);
         }
@@ -263,7 +262,7 @@ public class IntentBuilder {
      * @param value {@code String} array value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, String[] value) {
+    public BundleBuilder put(String name, String[] value) {
         if (value != null) {
             bundle.putStringArray(name, value);
         }
@@ -277,7 +276,7 @@ public class IntentBuilder {
      * @param value {@code Parcelable} array value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder put(String name, Parcelable[] value) {
+    public BundleBuilder put(String name, Parcelable[] value) {
         if (value != null) {
             bundle.putParcelableArray(name, value);
         }
@@ -291,7 +290,7 @@ public class IntentBuilder {
      * @param value {@code List<String>} value.
      * @return {@code this} to chain calls.
      */
-    public IntentBuilder putStringList(String name, List<String> value) {
+    public BundleBuilder putStringList(String name, List<String> value) {
         if (value != null) {
             ArrayList<String> list;
             if (value instanceof ArrayList) {
@@ -312,7 +311,7 @@ public class IntentBuilder {
      * @return {@code this} to chain calls.
      */
     @SuppressWarnings("unchecked")
-    public IntentBuilder putParcelableList(String name, List<? extends Parcelable> value) {
+    public BundleBuilder putParcelableList(String name, List<? extends Parcelable> value) {
         if (value != null) {
             ArrayList<? extends Parcelable> list;
             if (value instanceof ArrayList) {
@@ -331,7 +330,7 @@ public class IntentBuilder {
      * @param path part of scheme uri.
      * @return null if parsing failed.
      */
-    public IntentBuilder parse(String path) {
+    public BundleBuilder parse(String path) {
         return null;
     }
 
@@ -344,13 +343,13 @@ public class IntentBuilder {
     }
 
     /**
-     * Create {@link Intent} from _IntentBuilder attributes.
+     * Create {@link Intent} from _BundleBuilder attributes.
      *
      * @param context need by {@link Intent} constructor.
      * @return {@link Intent} related to navigation target.
      */
     public Intent build(Context context) {
-        throw new RuntimeException("IntentBuilder doesn't implement build method.");
+        throw new RuntimeException("BundleBuilder doesn't implement build method.");
     }
 
     /**
@@ -359,7 +358,7 @@ public class IntentBuilder {
      * @param context the caller context.
      */
     public void startActivity(Context context) {
-        throw new RuntimeException("IntentBuilder doesn't implement startActivity method.");
+        throw new RuntimeException("BundleBuilder doesn't implement startActivity method.");
     }
 
     /**
@@ -369,7 +368,7 @@ public class IntentBuilder {
      * @param requestCode to identify request.
      */
     public void startActivityForResult(Activity activity, int requestCode) {
-        throw new RuntimeException("IntentBuilder doesn't implement startActivityForResult method.");
+        throw new RuntimeException("BundleBuilder doesn't implement startActivityForResult method.");
     }
 
     /**
@@ -379,7 +378,7 @@ public class IntentBuilder {
      * @param requestCode to identify request.
      */
     public void startActivityForResult(Fragment fragment, int requestCode) {
-        throw new RuntimeException("IntentBuilder doesn't implement startActivityForResult method.");
+        throw new RuntimeException("BundleBuilder doesn't implement startActivityForResult method.");
     }
 
     /**
@@ -389,6 +388,6 @@ public class IntentBuilder {
      * @param requestCode to identify request.
      */
     public void startActivityForResult(android.support.v4.app.Fragment fragment, int requestCode) {
-        throw new RuntimeException("IntentBuilder doesn't implement startActivityForResult method.");
+        throw new RuntimeException("BundleBuilder doesn't implement startActivityForResult method.");
     }
 }

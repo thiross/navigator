@@ -2,7 +2,7 @@ package com.tutuur.navigator.models
 
 import com.squareup.javapoet.ClassName
 import com.tutuur.navigator.Navigation
-import com.tutuur.navigator.constants.Constants.INTENT_BUILDER_CLASS_SUFFIX
+import com.tutuur.navigator.constants.Constants.BUNDLE_BUILDER_CLASS_SUFFIX
 import javax.lang.model.element.AnnotationValue
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.PackageElement
@@ -37,7 +37,7 @@ data class NavigationTarget(val element: TypeElement) {
      * Bundle builder class name.
      */
     val builderName: ClassName =
-            ClassName.get(packageName, "${element.simpleName}$INTENT_BUILDER_CLASS_SUFFIX")
+            ClassName.get(packageName, "${element.simpleName}$BUNDLE_BUILDER_CLASS_SUFFIX")
 
     /**
      * [Navigation] annotation on [element]

@@ -15,9 +15,9 @@ public class SecondActivity extends AppCompatActivity {
 ```
 其中`page`字段制定跳转用的`/page`页面，`subpage`用来解析页面参数。
 
-`navigator-compiler`会在所有标记`@Navigation`或者属性有标记`@BundleExtra`类的package下生成一个`*__IntentBuilder`类，比如上例就会生成`SecondActivity__IntentBuilder`:
+`navigator-compiler`会在所有标记`@Navigation`或者属性有标记`@BundleExtra`类的package下生成一个`*__BundleBuilder`类，比如上例就会生成`SecondActivity__BundleBuilder`:
 ``` Java
-public final class SecondActivity__IntentBuilder extends IntentBuilder {
+public final class SecondActivity__BundleBuilder extends BundleBuilder {
     public static final String PAGE = "second";
     public static final String PATTERN = Pattern.compile("second/(?<userId>[^/]+)");
 }
@@ -32,13 +32,13 @@ public class SecondActivity extends AppCompatActivity {
     ...
 }
 ```
-`navigator-plugin`会扫描依赖的库和当前module，生成一个(`*__IntentBuilder.PAGE`, `Constructor<? extends IntentBuilder>`)的map
+`navigator-plugin`会扫描依赖的库和当前module，生成一个(`*__BundleBuilder.PAGE`, `Constructor<? extends BundleBuilder>`)的map
 跳转的时候可以通过如下方法传递`userId`给`SecondActivity`:
 ``` Java
-Navigator.parse("/second/10001") // `second`作为key，在map里找到对应的`IntentBuilder`
+Navigator.parse("/second/10001") // `second`作为key，在map里找到对应的`BundleBuilder`
     .startActivity(this);
 // or
-Navigator.parse("/second") // `second`作为key，在map里找到对应的`IntentBuilder`
+Navigator.parse("/second") // `second`作为key，在map里找到对应的`BundleBuilder`
     .put("userId", "10001")
     .startActivity(this);
 ```
@@ -126,8 +126,8 @@ repositories {
     }
 }
 dependencies {
-    implementation 'com.tutuur.android:navigator:0.9.13'
-    annotationProcessor 'com.tutuur.android:navigator-compiler:0.9.13'
+    implementation 'com.tutuur.android:navigator:0.9.14'
+    annotationProcessor 'com.tutuur.android:navigator-compiler:0.9.14'
 }
 ```
 
@@ -140,7 +140,7 @@ buildscript {
         }
     }
     depdendencies {
-        classpath 'com.tutuur.android:navigator-plugin:0.9.13'
+        classpath 'com.tutuur.android:navigator-plugin:0.9.14'
     }
 }
 ```

@@ -31,7 +31,7 @@ import kotlin.collections.ArrayList
 /**
  * A helper class to generate intent builder class of [target] class.
  */
-class IntentBuilderGenerator(private val target: NavigationTarget, private val env: ProcessingEnvironment) {
+class BundleBuilderGenerator(private val target: NavigationTarget, private val env: ProcessingEnvironment) {
 
     /**
      * @return [JavaFile] of bundle builder class.
@@ -106,7 +106,7 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
     private fun brewType(fields: List<Field>, parentFields: List<Field>): TypeSpec {
         // create type builder.
         val builder = TypeSpec.classBuilder(target.builderName)
-                .superclass(ClassName.get("com.tutuur.navigator", "IntentBuilder"))
+                .superclass(ClassName.get("com.tutuur.navigator", "BundleBuilder"))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addMethod(MethodSpec.constructorBuilder()
                         .addModifiers(Modifier.PUBLIC)
@@ -304,7 +304,7 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
 
     /**
      * @return [MethodSpec] of `parse` method. This method compares all schemes to {@code scheme} parameter,
-     * and returns `_IntentBuilder` object when matches.
+     * and returns `_BundleBuilder` object when matches.
      */
     private fun brewParseMethod(fields: List<Field>): MethodSpec {
         return MethodSpec.methodBuilder("parse")
@@ -372,6 +372,6 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
         /**
          * command line message tag.
          */
-        private val TAG = IntentBuilderGenerator::class.simpleName!!
+        private val TAG = BundleBuilderGenerator::class.simpleName!!
     }
 }

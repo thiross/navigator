@@ -25,7 +25,7 @@ class NavigatorServiceGenerator {
         def className = Constants.PATTERN_INIT_CLASS.replace('.', '/')
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES)
         writer.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC, className, null, "java/lang/Object", null)
-        String signature = "(Ljava/util/Map<Ljava/lang/String;Ljava/lang/reflect/Constructor<+Lcom.tutuur.navigator.IntentBuilder;>;>;)V"
+        String signature = "(Ljava/util/Map<Ljava/lang/String;Ljava/lang/reflect/Constructor<+Lcom.tutuur.navigator.BundleBuilder;>;>;)V"
         String[] exceptions = ["java/lang/NoSuchMethodException"]
         MethodVisitor mv = writer.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "init", "(Ljava/util/Map;)V", signature, exceptions)
         mv.visitCode()

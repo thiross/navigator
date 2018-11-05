@@ -40,7 +40,7 @@ public class SimpleActivityTest {
                 "A", "B", "D", "C"
         );
 
-        new SecondActivity__IntentBuilder()
+        new SecondActivity__BundleBuilder()
                 .charValue(charValue)
                 .byteValue(byteValue)
                 .shortValue(shortValue)

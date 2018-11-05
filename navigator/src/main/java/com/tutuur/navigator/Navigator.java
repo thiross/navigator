@@ -20,9 +20,9 @@ import static com.tutuur.navigator.constants.Constants.PATTERN_INIT_CLASS;
 @SuppressWarnings({"unused", "unchecked"})
 public class Navigator {
 
-    private static final Map<Class<?>, Constructor<? extends IntentBuilder>> BUILDERS = new LinkedHashMap<>();
+    private static final Map<Class<?>, Constructor<? extends BundleBuilder>> BUILDERS = new LinkedHashMap<>();
 
-    private static final Map<String, Constructor<? extends IntentBuilder>> FINDERS = new LinkedHashMap<>();
+    private static final Map<String, Constructor<? extends BundleBuilder>> FINDERS = new LinkedHashMap<>();
 
     private static boolean finderInitialized = false;
 
@@ -47,12 +47,12 @@ public class Navigator {
             return;
         }
         Class<?> targetClass = target.getClass();
-        Constructor<? extends IntentBuilder> constructor = findBuilderConstructorForClass(targetClass);
+        Constructor<? extends BundleBuilder> constructor = findBuilderConstructorForClass(targetClass);
         if (constructor == null) {
             throw new RuntimeException("can't find builder class for " + targetClass.getSimpleName());
         }
         try {
-            IntentBuilder builder = constructor.newInstance(bundle);
+            BundleBuilder builder = constructor.newInstance(bundle);
             builder.bind(target);
         } catch (InstantiationException e) {
             // do nothing.
@@ -64,15 +64,15 @@ public class Navigator {
     }
 
     @UiThread
-    private static Constructor<? extends IntentBuilder> findBuilderConstructorForClass(Class<?> cls) {
-        Constructor<? extends IntentBuilder> constructor = BUILDERS.get(cls);
+    private static Constructor<? extends BundleBuilder> findBuilderConstructorForClass(Class<?> cls) {
+        Constructor<? extends BundleBuilder> constructor = BUILDERS.get(cls);
         if (constructor != null) {
             return constructor;
         }
         try {
             String clsName = cls.getName();
-            Class<?> builderClass = cls.getClassLoader().loadClass(clsName + Constants.INTENT_BUILDER_CLASS_SUFFIX);
-            constructor = (Constructor<? extends IntentBuilder>) builderClass.getConstructor(Bundle.class);
+            Class<?> builderClass = cls.getClassLoader().loadClass(clsName + Constants.BUNDLE_BUILDER_CLASS_SUFFIX);
+            constructor = (Constructor<? extends BundleBuilder>) builderClass.getConstructor(Bundle.class);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("can't find builder class for " + cls.getSimpleName());
         } catch (NoSuchMethodException e) {
@@ -82,7 +82,7 @@ public class Navigator {
         return constructor;
     }
 
-    public static IntentBuilder parse(String path) {
+    public static BundleBuilder parse(String path) {
         if (path == null) {
             return null;
         }
@@ -100,12 +100,12 @@ public class Navigator {
             if (!finderInitialized) {
                 initializeFinders();
             }
-            Constructor<? extends IntentBuilder> constructor = FINDERS.get(page);
+            Constructor<? extends BundleBuilder> constructor = FINDERS.get(page);
             try {
                 if (constructor == null) {
                     return null;
                 }
-                IntentBuilder builder = constructor.newInstance();
+                BundleBuilder builder = constructor.newInstance();
                 builder.parse(path);
                 return builder;
             } catch (InstantiationException e) {
