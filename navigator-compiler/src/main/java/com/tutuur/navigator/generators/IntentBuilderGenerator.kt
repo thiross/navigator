@@ -117,10 +117,10 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
                         .addStatement("super(bundle)")
                         .build())
         // create static pattern field.
-        val allFields = parentFields + fields
         builder.addField(brewPageField(target.scheme))
         builder.addField(brewPatternField(target.scheme))
         // target bundle builder class.
+        val allFields = parentFields + fields
         allFields.forEach { field ->
             val typeName = TypeName.get(field.type)
             val name = field.name
@@ -188,8 +188,11 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
     }
 
     private fun brewPageField(scheme: Scheme): FieldSpec {
-        if (!scheme.isEmpty() && scheme.page.contains('/')) {
-            env.e(TAG, "page must not contains `/` ${target.className}")
+        if (scheme.page.contains('/')) {
+            env.e(TAG, "${target.className}: `page' must not contains `/'")
+        }
+        if (scheme.subPage.startsWith('/')) {
+            env.e(TAG, "${target.className}: `subpage' must not start with `/'")
         }
         val code = if (scheme.isEmpty()) {
             "null"
@@ -212,7 +215,7 @@ class IntentBuilderGenerator(private val target: NavigationTarget, private val e
             if (scheme.subPage.isEmpty()) {
                 scheme.page
             } else {
-                "${scheme.page}/${scheme.subPage}"
+                "${scheme.page}${scheme.subPage}"
             }.let {
                 """Pattern.compile("${it.replace(Regex(":([^/]+)"), "(?<$1>[^/]+)")}")"""
             }
