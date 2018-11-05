@@ -30,7 +30,7 @@ buildscript {
                     service: 'com.google.auto.service:auto-service:1.0-rc4'
             ],
             tutuur     : [
-                    'compilerutil': "com.tutuur.android:compiler-util:${VERSION_NAME}",
+                    'compilerutil': "com.tutuur.android:compiler-util:0.9.15",
                     'annotation'  : "com.tutuur.android:navigator-annotation:${VERSION_NAME}",
                     'compiler'    : "com.tutuur.android:navigator-compiler:${VERSION_NAME}",
                     'const'       : "com.tutuur.android:navigator-const:${VERSION_NAME}",
